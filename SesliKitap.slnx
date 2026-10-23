@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SesliKitap.API/SesliKitap.API.csproj" />
+    <Project Path="src/SesliKitap.Business/SesliKitap.Business.csproj" />
+    <Project Path="src/SesliKitap.Data/SesliKitap.Data.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SesliKitap.UnitTests/SesliKitap.UnitTests.csproj" />
+  </Folder>
+</Solution>

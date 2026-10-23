@@ -1,0 +1,34 @@
+@BaseUrl = http://localhost:5201
+@ApiKey = DEGISTIR_BENI_uzun_rastgele_anahtar_64_karakter
+
+### 1. Sağlık Kontrolü (Anonim — Ayrıntısız)
+GET {{BaseUrl}}/api/health
+Accept: application/json
+
+### 2. Sağlık Kontrolü (Kimliği Doğrulanmış — Ayrıntılı Bileşen Raporu)
+GET {{BaseUrl}}/api/health
+X-API-Key: {{ApiKey}}
+Accept: application/json
+
+### 3. Erişim Anahtarı Doğrulama (204 No Content)
+GET {{BaseUrl}}/api/auth/verify
+X-API-Key: {{ApiKey}}
+
+### 4. Medya Erişim Belirteci Üretme
+GET {{BaseUrl}}/api/auth/media-token
+X-API-Key: {{ApiKey}}
+Accept: application/json
+
+### 5. İç Pipeline Log Kaydı (Worker Simülasyonu)
+POST {{BaseUrl}}/api/internal/logs/pipeline
+X-API-Key: {{ApiKey}}
+Content-Type: application/json
+
+{
+  "asama": "MetinCikarma",
+  "durum": "Basladi",
+  "yuzde": 0,
+  "mesaj": "PDF metin çıkarma başlatıldı.",
+  "kaynak": "Worker",
+  "traceId": "test-trace-001"
+}
