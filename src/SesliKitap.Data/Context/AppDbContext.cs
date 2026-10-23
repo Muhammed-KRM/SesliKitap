@@ -21,6 +21,12 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    /// <summary>Kütüphanedeki kitaplar tablosu.</summary>
+    public virtual DbSet<Book> Books => Set<Book>();
+
+    /// <summary>Kitap bölümleri tablosu.</summary>
+    public virtual DbSet<BookChapter> BookChapters => Set<BookChapter>();
+
     /// <summary>HTTP uç noktası (endpoint) istek/yanıt logları (Katman 1).</summary>
     public virtual DbSet<EndpointLog> EndpointLogs => Set<EndpointLog>();
 

@@ -41,6 +41,11 @@ public static class EnvFileLoader
     {
         ArgumentNullException.ThrowIfNull(configuration);
 
+        if (string.Equals(configuration["Testing:DisableEnvFile"], "true", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         var envFilePath = FindNearestEnvFile(Directory.GetCurrentDirectory())
                           ?? FindNearestEnvFile(AppContext.BaseDirectory);
 

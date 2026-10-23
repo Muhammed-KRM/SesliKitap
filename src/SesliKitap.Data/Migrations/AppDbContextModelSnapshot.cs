@@ -22,6 +22,277 @@ namespace SesliKitap.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SesliKitap.Data.Entities.Book", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Aciklama")
+                        .HasColumnType("text")
+                        .HasColumnName("aciklama");
+
+                    b.Property<string>("Baslik")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("baslik");
+
+                    b.Property<string>("Dil")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("tr")
+                        .HasColumnName("dil");
+
+                    b.Property<long>("DosyaBoyutu")
+                        .HasColumnType("bigint")
+                        .HasColumnName("dosya_boyutu");
+
+                    b.Property<int>("DosyaFormati")
+                        .HasColumnType("integer")
+                        .HasColumnName("dosya_formati");
+
+                    b.Property<string>("DosyaHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character(64)")
+                        .HasColumnName("dosya_hash")
+                        .IsFixedLength();
+
+                    b.Property<int>("Durum")
+                        .HasColumnType("integer")
+                        .HasColumnName("durum");
+
+                    b.Property<DateTime?>("GuncellemeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("guncelleme_tarihi");
+
+                    b.Property<string>("HataMesaji")
+                        .HasColumnType("text")
+                        .HasColumnName("hata_mesaji");
+
+                    b.Property<string>("KapakYolu")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("kapak_yolu");
+
+                    b.Property<string>("KaynakKimligi")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("kaynak_kimligi");
+
+                    b.Property<int>("KaynakTipi")
+                        .HasColumnType("integer")
+                        .HasColumnName("kaynak_tipi");
+
+                    b.Property<string>("KaynakUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("kaynak_url");
+
+                    b.Property<int>("KelimeSayisi")
+                        .HasColumnType("integer")
+                        .HasColumnName("kelime_sayisi");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("metadata");
+
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("olusturma_tarihi");
+
+                    b.Property<string>("OrijinalDosyaAdi")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("orijinal_dosya_adi");
+
+                    b.Property<string>("OrijinalDosyaYolu")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("orijinal_dosya_yolu");
+
+                    b.Property<int?>("SayfaSayisi")
+                        .HasColumnType("integer")
+                        .HasColumnName("sayfa_sayisi");
+
+                    b.Property<bool>("SilindiMi")
+                        .HasColumnType("boolean")
+                        .HasColumnName("silindi_mi");
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("silinme_tarihi");
+
+                    b.Property<DateTime?>("SonDinlenmeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("son_dinlenme_tarihi");
+
+                    b.Property<double>("ToplamSureSn")
+                        .HasColumnType("double precision")
+                        .HasColumnName("toplam_sure_sn");
+
+                    b.Property<Guid?>("VarsayilanSesProfiliId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("varsayilan_ses_profili_id");
+
+                    b.Property<int?>("YayinYili")
+                        .HasColumnType("integer")
+                        .HasColumnName("yayin_yili");
+
+                    b.Property<string>("Yazar")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("yazar");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DosyaHash")
+                        .IsUnique()
+                        .HasDatabaseName("idx_books_dosya_hash_unique")
+                        .HasFilter("silindi_mi = false AND dosya_hash IS NOT NULL");
+
+                    b.HasIndex("Durum")
+                        .HasDatabaseName("idx_books_durum");
+
+                    b.HasIndex("OlusturmaTarihi")
+                        .IsDescending()
+                        .HasDatabaseName("idx_books_olusturma_tarihi");
+
+                    b.HasIndex("SonDinlenmeTarihi")
+                        .IsDescending()
+                        .HasDatabaseName("idx_books_son_dinlenme_tarihi");
+
+                    b.ToTable("books", (string)null);
+                });
+
+            modelBuilder.Entity("SesliKitap.Data.Entities.BookChapter", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Baslik")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("baslik");
+
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("book_id");
+
+                    b.Property<int?>("CumleSayisi")
+                        .HasColumnType("integer")
+                        .HasColumnName("cumle_sayisi");
+
+                    b.Property<bool>("DahilMi")
+                        .HasColumnType("boolean")
+                        .HasColumnName("dahil_mi");
+
+                    b.Property<long>("GpuMs")
+                        .HasColumnType("bigint")
+                        .HasColumnName("gpu_ms");
+
+                    b.Property<DateTime?>("GuncellemeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("guncelleme_tarihi");
+
+                    b.Property<string>("HataMesaji")
+                        .HasColumnType("text")
+                        .HasColumnName("hata_mesaji");
+
+                    b.Property<int>("KarakterSayisi")
+                        .HasColumnType("integer")
+                        .HasColumnName("karakter_sayisi");
+
+                    b.Property<int>("KelimeSayisi")
+                        .HasColumnType("integer")
+                        .HasColumnName("kelime_sayisi");
+
+                    b.Property<int>("MetinSurumu")
+                        .HasColumnType("integer")
+                        .HasColumnName("metin_surumu");
+
+                    b.Property<long?>("Mp3Boyutu")
+                        .HasColumnType("bigint")
+                        .HasColumnName("mp3_boyutu");
+
+                    b.Property<string>("Mp3Yolu")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("mp3_yolu");
+
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("olusturma_tarihi");
+
+                    b.Property<long?>("OpusBoyutu")
+                        .HasColumnType("bigint")
+                        .HasColumnName("opus_boyutu");
+
+                    b.Property<string>("OpusYolu")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("opus_yolu");
+
+                    b.Property<string>("OtomatikHaricNedeni")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("otomatik_haric_nedeni");
+
+                    b.Property<int>("SesDurumu")
+                        .HasColumnType("integer")
+                        .HasColumnName("ses_durumu");
+
+                    b.Property<int?>("SesMetinSurumu")
+                        .HasColumnType("integer")
+                        .HasColumnName("ses_metin_surumu");
+
+                    b.Property<int?>("SesMotoru")
+                        .HasColumnType("integer")
+                        .HasColumnName("ses_motoru");
+
+                    b.Property<Guid?>("SesProfiliId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ses_profili_id");
+
+                    b.Property<int>("SiraNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("sira_no");
+
+                    b.Property<double?>("SureSn")
+                        .HasColumnType("double precision")
+                        .HasColumnName("sure_sn");
+
+                    b.Property<string>("TemizMetin")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("temiz_metin");
+
+                    b.Property<string>("ZamanDamgasiYolu")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("zaman_damgasi_yolu");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SesDurumu")
+                        .HasDatabaseName("idx_book_chapters_ses_durumu");
+
+                    b.HasIndex("BookId", "DahilMi")
+                        .HasDatabaseName("idx_book_chapters_book_id_dahil_mi");
+
+                    b.HasIndex("BookId", "SiraNo")
+                        .IsUnique()
+                        .HasDatabaseName("idx_book_chapters_book_id_sira_no");
+
+                    b.ToTable("book_chapters", (string)null);
+                });
+
             modelBuilder.Entity("SesliKitap.Data.Entities.EndpointLog", b =>
                 {
                     b.Property<long>("Id")
@@ -294,6 +565,22 @@ namespace SesliKitap.Data.Migrations
                         .HasDatabaseName("idx_pipeline_logs_trace_id");
 
                     b.ToTable("pipeline_logs", (string)null);
+                });
+
+            modelBuilder.Entity("SesliKitap.Data.Entities.BookChapter", b =>
+                {
+                    b.HasOne("SesliKitap.Data.Entities.Book", "Book")
+                        .WithMany("Bolumler")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+                });
+
+            modelBuilder.Entity("SesliKitap.Data.Entities.Book", b =>
+                {
+                    b.Navigation("Bolumler");
                 });
 #pragma warning restore 612, 618
         }

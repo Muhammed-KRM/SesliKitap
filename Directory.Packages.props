@@ -6,6 +6,7 @@
   <ItemGroup>
     <!-- Transitive Security Pins -->
     <PackageVersion Include="Microsoft.OpenApi" Version="2.13.0" />
+    <PackageVersion Include="SSH.NET" Version="2026.0.0" />
     <!-- Entity Framework Core & PostgreSQL -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />

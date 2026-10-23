@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SesliKitap.API.Hubs;
 using SesliKitap.API.Middleware;
 using SesliKitap.Business.Interfaces;
 using SesliKitap.Data.Context;
@@ -39,6 +40,7 @@ public static class ApplicationBuilderExtensions
         app.UseAuthorization();
 
         app.MapControllers().RequireRateLimiting("general");
+        app.MapHub<AudiobookHub>("/hubs/audiobook");
 
         return app;
     }

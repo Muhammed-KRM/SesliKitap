@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SesliKitap — SignalR Canlı Olay İzleyici</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0b0f19; color: #e2e8f0; margin: 24px; }
+    .card { background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 16px; border: 1px solid #334155; }
+    label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
+    input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; margin-bottom: 10px; box-sizing: border-box; }
+    button { background: #3b82f6; color: #fff; border: none; border-radius: 6px; padding: 8px 14px; cursor: pointer; margin-right: 8px; font-weight: 600; }
+    button.secondary { background: #475569; }
+    pre { background: #0f172a; padding: 12px; border-radius: 8px; max-height: 480px; overflow-y: auto; font-size: 13px; line-height: 1.5; border: 1px solid #334155; }
+    .status { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #334155; }
+    .status.connected { background: #166534; color: #bbf7d0; }
+  </style>
+</head>
+<body>
+  <h2>SesliKitap — SignalR Canlı Olay İzleyici (Faz 2+)</h2>
+  <div class="card">
+    <label>Hub URL</label>
+    <input id="hubUrl" value="http://localhost:5201/hubs/audiobook" />
+    <label>API Anahtarı (ADMIN_API_KEY)</label>
+    <input id="apiKey" type="password" placeholder=".env içindeki ADMIN_API_KEY değerini girin" />
+    <label>Kitap Kimliği (BookId — opsiyonel)</label>
+    <input id="bookId" placeholder="0192c7b2-..." />
+    <div>
+      <button onclick="connectHub()">Bağlan ve Kütüphaneyi Dinle</button>
+      <button class="secondary" onclick="joinBook()">Kitap Grubuna Katıl</button>
+      <button class="secondary" onclick="clearLogs()">Temizle</button>
+      <span id="connStatus" class="status">Bağlı Değil</span>
+    </div>
+  </div>
+  <div class="card">
+    <label>Gelen SignalR Olayları</label>
+    <pre id="logOutput"></pre>
+  </div>
+
+  <script>
+    let connection = null;
+    const logEl = document.getElementById('logOutput');
+    const statusEl = document.getElementById('connStatus');
+
+    function appendLog(eventName, payload) {
+      const ts = new Date().toISOString();
+      logEl.textContent = `[${ts}] ${eventName}:\n${JSON.stringify(payload, null, 2)}\n\n` + logEl.textContent;
+    }
+
+    function clearLogs() {
+      logEl.textContent = '';
+    }
+
+    async function connectHub() {
+      const hubUrl = document.getElementById('hubUrl').value.trim();
+      const apiKey = document.getElementById('apiKey').value.trim();
+
+      if (connection) {
+        await connection.stop();
+      }
+
+      connection = new signalR.HubConnectionBuilder()
+        .withUrl(hubUrl, { accessTokenFactory: () => apiKey })
+        .withAutomaticReconnect()
+        .build();
+
+      const events = [
+        'BookProcessingProgress',
+        'BookProcessed',
+        'BookStatusChanged',
+        'PipelineError',
+        'SynthesisProgress',
+        'ChapterReady',
+        'SynthesisCompleted',
+        'VoiceProfileReady',
+        'ProgressUpdated'
+      ];
+
+      for (const evt of events) {
+        connection.on(evt, data => appendLog(evt, data));
+      }
+
+      try {
+        await connection.start();
+        statusEl.textContent = 'Bağlandı (' + connection.connectionId + ')';
+        statusEl.className = 'status connected';
+        await connection.invoke('JoinLibrary');
+        appendLog('SYSTEM', { message: 'JoinLibrary çağrıldı.' });
+        const bookId = document.getElementById('bookId').value.trim();
+        if (bookId) {
+          await connection.invoke('JoinBookGroup', bookId);
+          appendLog('SYSTEM', { message: 'JoinBookGroup çağrıldı: ' + bookId });
+        }
+      } catch (err) {
+        statusEl.textContent = 'Bağlantı Hatası';
+        statusEl.className = 'status';
+        appendLog('ERROR', { error: err.toString() });
+      }
+    }
+
+    async function joinBook() {
+      const bookId = document.getElementById('bookId').value.trim();
+      if (!connection || !bookId) return;
+      await connection.invoke('JoinBookGroup', bookId);
+      appendLog('SYSTEM', { message: 'JoinBookGroup çağrıldı: ' + bookId });
+    }
+  </script>
+</body>
+</html>

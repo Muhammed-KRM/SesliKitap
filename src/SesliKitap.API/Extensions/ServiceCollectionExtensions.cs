@@ -73,10 +73,15 @@ public static class ServiceCollectionExtensions
 
         // 3) SignalR Canlı Bildirim
         services.AddSignalR(options =>
-        {
-            options.MaximumReceiveMessageSize = 64 * 1024;
-            options.EnableDetailedErrors = environment.IsDevelopment();
-        });
+            {
+                options.MaximumReceiveMessageSize = 64 * 1024;
+                options.EnableDetailedErrors = environment.IsDevelopment();
+            })
+            .AddJsonProtocol(options =>
+            {
+                options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
         // 4) Yanıt Sıkıştırma (Brotli + Gzip; ses akışları hariç)
         services.AddResponseCompression(options =>

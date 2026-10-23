@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Minio;
 using SesliKitap.Business.Infrastructure.Cache;
+using SesliKitap.Business.Infrastructure.Messaging;
 using SesliKitap.Business.Infrastructure.Storage;
 using SesliKitap.Business.Infrastructure.Time;
 using SesliKitap.Business.Interfaces;
@@ -51,6 +52,11 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<UploadOptions>()
+            .Bind(configuration.GetSection(UploadOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         // 2) FluentValidation doğrulayıcıları
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -87,8 +93,12 @@ public static class DependencyInjection
         services.AddSingleton<ICacheService, RedisCacheService>();
 
         // 6) İş servisleri
+        services.AddScoped<IEventPublisher, MassTransitEventPublisher>();
         services.AddScoped<ILogService, LogManager>();
         services.AddScoped<IHealthReportService, HealthReportManager>();
+        services.AddScoped<IBookService, BookManager>();
+        services.AddScoped<BookProcessingResultHandler>();
+        services.AddScoped<IChapterService, ChapterManager>();
 
         // 7) MassTransit + RabbitMQ (Python uyumu için Raw JSON)
         services.AddMassTransit(x =>
@@ -110,7 +120,7 @@ public static class DependencyInjection
                 });
 
                 rmq.UseRawJsonSerializer();
-                rmq.UseRawJsonDeserializer();
+                rmq.UseRawJsonDeserializer(RawSerializerOptions.AnyMessageType, isDefault: true);
 
                 rmq.UseMessageRetry(r => r.Exponential(
                     retryLimit: 3,

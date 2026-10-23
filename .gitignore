@@ -59,6 +59,8 @@ wheels/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.coverage
+.coverage.*
 src/SesliKitap.PythonWorker/temp/
 src/SesliKitap.PythonWorker/logs/
 gpu/**/__pycache__/
@@ -73,6 +75,7 @@ gpu/.modal/
 *.pdf
 *.epub
 !docs/**/*.pdf
+docs/test-raporlari/*.pdf
 
 ## Node / Angular (Frontend) & E2E
 node_modules/

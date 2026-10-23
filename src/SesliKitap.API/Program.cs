@@ -1,6 +1,10 @@
 using Serilog;
+using SesliKitap.API.BackgroundServices;
+using SesliKitap.API.Consumers;
 using SesliKitap.API.Extensions;
+using SesliKitap.API.Hubs;
 using SesliKitap.Business;
+using SesliKitap.Business.Interfaces;
 using SesliKitap.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +24,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services
     .AddApiPresentation(builder.Configuration, builder.Environment)
     .AddDataLayer(connectionString)
-    .AddBusinessLayer(builder.Configuration);
+    .AddBusinessLayer(builder.Configuration, bus =>
+    {
+        bus.AddConsumer<BookProcessedConsumer>();
+        bus.AddConsumer<PipelineStageChangedConsumer>();
+        bus.AddConsumer<PipelineErrorConsumer>();
+    })
+    .AddScoped<INotificationService, SignalRNotificationService>()
+    .AddHostedService<StorageCleanupBackgroundService>();
 
 var app = builder.Build();
 app.UseApiPipeline();

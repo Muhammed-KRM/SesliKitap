@@ -81,7 +81,7 @@ public static class HashHelper
     /// </summary>
     /// <param name="input">Özetlenecek girdi metni.</param>
     /// <returns>40 karakterli küçük harf hex SHA-1 özeti.</returns>
-    #pragma warning disable CA5350 // Önbellek anahtarı üretimi için SHA-1 güvenlidir (kriptografik amaçlı değildir)
+#pragma warning disable CA5350 // Önbellek anahtarı üretimi için SHA-1 güvenlidir (kriptografik amaçlı değildir)
     public static string Sha1Hex(string input)
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -89,5 +89,5 @@ public static class HashHelper
         var hashBytes = SHA1.HashData(bytes);
         return Convert.ToHexStringLower(hashBytes);
     }
-    #pragma warning restore CA5350
+#pragma warning restore CA5350
 }

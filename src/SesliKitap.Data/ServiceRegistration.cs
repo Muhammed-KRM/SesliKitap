@@ -32,6 +32,8 @@ public static class ServiceRegistration
             lifetime: ServiceLifetime.Scoped);
 
         services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<IBookRepository, BookRepository>();
+        services.AddScoped<IChapterRepository, ChapterRepository>();
 
         return services;
     }

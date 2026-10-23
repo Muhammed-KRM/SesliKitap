@@ -40,7 +40,7 @@ public sealed class AuditingInterceptor : SaveChangesInterceptor
 
         foreach (var entry in context.ChangeTracker.Entries())
         {
-            if (entry is { State: EntityState.Deleted, Entity: ISoftDeletable softDeletable })
+            if (entry is { State: EntityState.Deleted, Entity: ISoftDeletable { SilindiMi: false } softDeletable })
             {
                 entry.State = EntityState.Modified;
                 softDeletable.SilindiMi = true;
