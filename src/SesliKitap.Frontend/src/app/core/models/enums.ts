@@ -36,3 +36,5 @@ export type SentezIsDurumu =
   | 'KismiTamamlandi'
   | 'IptalEdildi'
   | 'Hata';
+
+export type AudioFormat = 'opus' | 'mp3';

@@ -81,3 +81,16 @@ public sealed record SynthesisCompletedMessage(
     int TamamlananBolum,
     int HataliBolum,
     decimal MaliyetUsd);
+
+/// <summary>
+/// Cihazlar arası dinleme konumu güncelleme bildirimi yükü (<c>ProgressUpdated</c>).
+/// </summary>
+public sealed record ProgressUpdatedMessage(
+    Guid BookId,
+    Guid ChapterId,
+    int BolumSiraNo,
+    double PozisyonSn,
+    double OynatmaHizi,
+    string CihazKimligi,
+    string? CihazAdi,
+    DateTime IstemciZamani);

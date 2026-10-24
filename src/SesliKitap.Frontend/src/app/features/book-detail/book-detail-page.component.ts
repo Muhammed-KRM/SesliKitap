@@ -13,12 +13,17 @@ import { Router, RouterLink } from '@angular/router';
 import { T } from '../../core/i18n/tr';
 import { BookDetail } from '../../core/models/book.model';
 import { ChapterSummary } from '../../core/models/chapter.model';
+import { ProgressDto } from '../../core/models/progress.model';
 import { BookService } from '../../core/services/book.service';
+import { DownloadManagerService } from '../../core/services/download-manager.service';
+import { MediaTokenService } from '../../core/services/media-token.service';
+import { ProgressService } from '../../core/services/progress.service';
 import { SignalrService } from '../../core/services/signalr.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../shared/components/confirm-dialog.component';
 import { CoverImageComponent } from '../../shared/components/cover-image.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { ClockPipe } from '../../shared/pipes/clock.pipe';
 import { DurationPipe } from '../../shared/pipes/duration.pipe';
 import { FileSizePipe } from '../../shared/pipes/file-size.pipe';
 import { ChapterEditorComponent } from './chapter-editor.component';
@@ -33,6 +38,7 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
     RouterLink,
     CoverImageComponent,
     StatusBadgeComponent,
+    ClockPipe,
     DurationPipe,
     FileSizePipe,
     ProcessingStatusComponent,
@@ -86,8 +92,48 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
                   [routerLink]="['/dinle', b.id]"
                   class="min-h-[44px] px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-slate-950 font-semibold text-sm flex items-center gap-2 transition"
                 >
-                  ▶ {{ t.bookDetail.listen }}
+                  @if (progress(); as p) {
+                    ▶ Devam et ({{ p.bolumSiraNo }}. Bölüm {{ p.pozisyonSn | clock }})
+                  } @else {
+                    ▶ {{ t.bookDetail.listen }}
+                  }
                 </a>
+                <button
+                  type="button"
+                  (click)="downloadOffline()"
+                  class="min-h-[44px] px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-sm font-semibold transition"
+                >
+                  ⬇ {{ t.bookDetail.downloadOffline }}
+                </button>
+                <div class="relative">
+                  <button
+                    type="button"
+                    (click)="exportMenuOpen.set(!exportMenuOpen())"
+                    class="min-h-[44px] px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-sm font-semibold transition"
+                  >
+                    📦 {{ t.bookDetail.export }} ▾
+                  </button>
+                  @if (exportMenuOpen()) {
+                    <div
+                      class="absolute left-0 mt-2 w-48 rounded-xl bg-white dark:bg-surface-900 border border-slate-200 dark:border-slate-700 shadow-xl py-1 z-20"
+                    >
+                      <button
+                        type="button"
+                        (click)="exportZip('opus')"
+                        class="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                      >
+                        ZIP İndir (Opus)
+                      </button>
+                      <button
+                        type="button"
+                        (click)="exportZip('mp3')"
+                        class="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                      >
+                        ZIP İndir (MP3)
+                      </button>
+                    </div>
+                  }
+                </div>
               }
               <button
                 type="button"
@@ -238,6 +284,9 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
 })
 export class BookDetailPageComponent implements OnInit {
   private readonly bookService = inject(BookService);
+  private readonly progressService = inject(ProgressService);
+  private readonly downloadManager = inject(DownloadManagerService);
+  private readonly mediaToken = inject(MediaTokenService);
   readonly signalr = inject(SignalrService);
   private readonly confirm = inject(ConfirmService);
   private readonly toast = inject(ToastService);
@@ -248,7 +297,9 @@ export class BookDetailPageComponent implements OnInit {
 
   readonly t = T;
   readonly book = signal<BookDetail | null>(null);
+  readonly progress = signal<ProgressDto | null>(null);
   readonly loading = signal(true);
+  readonly exportMenuOpen = signal(false);
   readonly activeTab = signal<'chapters' | 'synthesis' | 'info'>('chapters');
   readonly editingChapterId = signal<string | null>(null);
   readonly selectedForSynthesis = signal<string[]>([]);
@@ -307,6 +358,29 @@ export class BookDetailPageComponent implements OnInit {
         this.loading.set(false);
       }
     });
+    this.progressService.get(this.id()).subscribe((prog) => {
+      this.progress.set(prog);
+    });
+  }
+
+  downloadOffline(): void {
+    const b = this.book();
+    if (!b) return;
+    void this.downloadManager.enqueueBook(b.id).then(() => {
+      this.toast.info('Çevrimdışı indirme başlatıldı.');
+    });
+  }
+
+  async exportZip(format: 'opus' | 'mp3'): Promise<void> {
+    this.exportMenuOpen.set(false);
+    const b = this.book();
+    if (!b) return;
+    try {
+      const url = await this.mediaToken.exportZipUrl(b.id, format);
+      window.open(url, '_blank');
+    } catch {
+      this.toast.error('Dışa aktarma bağlantısı oluşturulamadı.');
+    }
   }
 
   onChaptersUpdated(chapters: ChapterSummary[]): void {

@@ -46,4 +46,7 @@ public static class ErrorCodes
 
     /// <summary>Ele alınmamış beklenmeyen API istisnası.</summary>
     public const string ApiUnhandledError = "API_UNHANDLED_ERR";
+
+    /// <summary>İstek doğrulama hatası.</summary>
+    public const string ValidationFailed = "VALIDATION_FAILED";
 }

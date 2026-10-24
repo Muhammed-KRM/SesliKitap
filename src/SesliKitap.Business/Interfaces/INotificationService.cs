@@ -81,4 +81,19 @@ public interface INotificationService
         int hataliBolum,
         decimal maliyetUsd,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Dinleme konumu güncellendiğinde gönderen bağlantı dışındaki istemcilere bildirir (<c>ProgressUpdated</c>).
+    /// </summary>
+    Task ProgressUpdatedAsync(
+        Guid bookId,
+        Guid chapterId,
+        int bolumSiraNo,
+        double pozisyonSn,
+        double oynatmaHizi,
+        string cihazKimligi,
+        string? cihazAdi,
+        DateTime istemciZamani,
+        string? senderConnectionId = null,
+        CancellationToken ct = default);
 }

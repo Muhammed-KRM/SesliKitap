@@ -44,4 +44,9 @@ public interface IAudiobookClient
     /// Seslendirme işi tamamlanma olayı.
     /// </summary>
     Task SynthesisCompleted(SynthesisCompletedMessage message);
+
+    /// <summary>
+    /// Cihazlar arası dinleme konumu güncelleme olayı.
+    /// </summary>
+    Task ProgressUpdated(ProgressUpdatedMessage message);
 }

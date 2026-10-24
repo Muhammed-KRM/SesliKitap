@@ -1,23 +1,23 @@
-export interface ListeningProgressDto {
+export interface ProgressDto {
   bookId: string;
   chapterId: string;
   bolumSiraNo: number;
-  konumSn: number;
-  cumleIndeksi: number | null;
+  pozisyonSn: number;
   oynatmaHizi: number;
   tamamlanmaYuzdesi: number;
-  sonCihazKimligi: string;
-  sonCihazAdi: string | null;
-  istemciZamanDamgasi: string;
+  cihazKimligi: string;
+  cihazAdi: string | null;
+  istemciZamani: string;
+  tamamlandiMi: boolean;
   guncellemeTarihi: string;
 }
 
 export interface ProgressUpdateRequest {
   chapterId: string;
-  konumSn: number;
-  cumleIndeksi?: number | null;
+  pozisyonSn: number;
   oynatmaHizi: number;
   cihazKimligi: string;
   cihazAdi?: string | null;
-  istemciZamanDamgasi: string;
+  istemciZamani: string;
+  tamamlandiMi?: boolean;
 }

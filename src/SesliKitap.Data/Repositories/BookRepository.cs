@@ -84,7 +84,7 @@ public sealed class BookRepository : GenericRepository<Book>, IBookRepository
                 b.Bolumler.Count(c => c.DahilMi),
                 b.Bolumler.Count(c => c.DahilMi && c.SesDurumu == BolumSesDurumu.Hazir),
                 b.ToplamSureSn,
-                null,
+                b.Konum != null ? (double?)b.Konum.TamamlanmaYuzdesi : null,
                 b.KapakYolu != null,
                 b.OlusturmaTarihi,
                 b.SonDinlenmeTarihi))
@@ -100,7 +100,7 @@ public sealed class BookRepository : GenericRepository<Book>, IBookRepository
 
         return await DbSet
             .AsNoTracking()
-            .Where(b => b.SonDinlenmeTarihi != null)
+            .Where(b => b.SonDinlenmeTarihi != null && b.Konum != null && !b.Konum.TamamlandiMi)
             .OrderByDescending(b => b.SonDinlenmeTarihi)
             .Take(safeCount)
             .Select(b => new BookListRow(
@@ -111,7 +111,7 @@ public sealed class BookRepository : GenericRepository<Book>, IBookRepository
                 b.Bolumler.Count(c => c.DahilMi),
                 b.Bolumler.Count(c => c.DahilMi && c.SesDurumu == BolumSesDurumu.Hazir),
                 b.ToplamSureSn,
-                null,
+                b.Konum != null ? (double?)b.Konum.TamamlanmaYuzdesi : null,
                 b.KapakYolu != null,
                 b.OlusturmaTarihi,
                 b.SonDinlenmeTarihi))

@@ -67,12 +67,11 @@ export interface ProgressUpdatedMsg {
   bookId: string;
   chapterId: string;
   bolumSiraNo: number;
-  konumSn: number;
-  cumleIndeksi?: number | null;
+  pozisyonSn: number;
   oynatmaHizi: number;
   cihazKimligi: string;
   cihazAdi?: string | null;
-  istemciZamanDamgasi: string;
+  istemciZamani: string;
 }
 
 export type HubConnectionStatus = 'connected' | 'reconnecting' | 'disconnected';

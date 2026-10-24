@@ -138,6 +138,43 @@ export const T = {
     title: 'Sentez İşleri',
     empty: 'Henüz başlatılmış bir seslendirme işi bulunmuyor.'
   },
+  player: {
+    play: 'Oynat',
+    pause: 'Duraklat',
+    skipBackward: 'Geri Sar',
+    skipForward: 'İleri Sar',
+    prevChapter: 'Önceki Bölüm',
+    nextChapter: 'Sonraki Bölüm',
+    speed: 'Oynatma Hızı',
+    sleepTimer: 'Uyku Zamanlayıcısı',
+    sleepEndOfChapter: 'Bölüm Sonunda Durdur',
+    sleepOff: 'Zamanlayıcıyı Kapat',
+    chapters: 'Bölümler',
+    bookmarks: 'Yer İmleri',
+    addBookmark: 'Yer İmi Ekle',
+    showText: 'Metni Göster',
+    hideText: 'Metni Gizle',
+    returnToReading: 'Okunan Yere Dön'
+  },
+  downloads: {
+    title: 'Çevrimdışı İndirilenler',
+    empty: 'Henüz çevrimdışı dinlemek için indirilmiş kitap bulunmuyor.',
+    storageUsed: 'Kullanılan Depolama',
+    deleteAll: 'Tümünü Sil',
+    updateAvailable: 'Güncelleme var'
+  },
+  discover: {
+    title: 'Kitap Keşfet',
+    searchPlaceholder: 'Kitap adı veya yazar ara (örn. Ömer Seyfettin, Sabahattin Ali)...',
+    searchButton: 'Ara',
+    empty: 'Arama yapmak için yukarıdaki kutuya kitap veya yazar adı yazın.',
+    noResults: 'Aramanızla eşleşen indirilebilir Türkçe kitap bulunamadı.',
+    inLibrary: 'Kütüphanede Var',
+    addToLibrary: 'Kütüphaneme Ekle',
+    viewFiles: 'Dosyaları Gör',
+    webCopyrightWarning:
+      'Web araması doğrulanmamış dış kaynakları listeler. Yalnızca telif hakkı süresi dolmuş veya kullanım hakkınız olan eserleri içe aktarın.'
+  },
   settings: {
     title: 'Ayarlar',
     theme: 'Görünüm Teması',
@@ -147,6 +184,9 @@ export const T = {
     skipForward: 'İleri Sarma Süresi (sn)',
     defaultSpeed: 'Varsayılan Oynatma Hızı',
     audioFormat: 'Tercih Edilen Ses Formatı',
+    formatAuto: 'Otomatik (Önerilen - Opus / MP3)',
+    formatOpus: 'Her Zaman Opus (Düşük Boyut)',
+    formatMp3: 'Her Zaman MP3 (Geniş Uyumluluk)',
     deviceName: 'Bu Cihazın Adı',
     logout: 'Erişim Anahtarını Temizle ve Çıkış Yap',
     healthTitle: 'Sistem ve Altyapı Sağlığı'

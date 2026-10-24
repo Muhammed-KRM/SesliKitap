@@ -132,4 +132,9 @@ public sealed class Book : AuditableEntity, ISoftDeletable
     /// Kitaba ait bölümler.
     /// </summary>
     public ICollection<BookChapter> Bolumler { get; set; } = new List<BookChapter>();
+
+    /// <summary>
+    /// Kitaba ait dinleme konumu.
+    /// </summary>
+    public ListeningProgress? Konum { get; set; }
 }

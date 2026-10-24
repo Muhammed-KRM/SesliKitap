@@ -8,11 +8,12 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { T } from '../../core/i18n/tr';
 import { BookListDto } from '../../core/models/book.model';
 import { KitapDurumu } from '../../core/models/enums';
+import { AudioPlayerService } from '../../core/services/audio-player.service';
 import { BookService } from '../../core/services/book.service';
 import { SignalrService } from '../../core/services/signalr.service';
 import { CoverImageComponent } from '../../shared/components/cover-image.component';
@@ -73,12 +74,13 @@ import { UploadDialogComponent } from './upload-dialog.component';
                   <div class="mt-2">
                     <app-progress-bar [value]="item.tamamlanmaYuzdesi ?? 0" variant="emerald" />
                   </div>
-                  <a
-                    [routerLink]="['/dinle', item.id]"
+                  <button
+                    type="button"
+                    (click)="continueListening(item.id)"
                     class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-400 hover:text-brand-300"
                   >
-                    ▶ {{ t.bookDetail.listen }}
-                  </a>
+                    ▶ Devam
+                  </button>
                 </div>
               </div>
             }
@@ -177,6 +179,8 @@ import { UploadDialogComponent } from './upload-dialog.component';
 })
 export class LibraryPageComponent implements OnInit {
   private readonly bookService = inject(BookService);
+  private readonly audioPlayer = inject(AudioPlayerService);
+  private readonly router = inject(Router);
   readonly signalr = inject(SignalrService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -280,5 +284,10 @@ export class LibraryPageComponent implements OnInit {
       this.droppedFile.set(files[0]);
       this.uploadDialogOpen.set(true);
     }
+  }
+
+  continueListening(bookId: string): void {
+    void this.audioPlayer.loadBook(bookId, { autoplay: true });
+    void this.router.navigate(['/dinle', bookId]);
   }
 }

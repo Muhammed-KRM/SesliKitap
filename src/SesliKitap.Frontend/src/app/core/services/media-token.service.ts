@@ -58,4 +58,14 @@ export class MediaTokenService {
     const token = await this.getToken();
     return `${environment.apiUrl}/voice-profiles/${voiceId}/sample?t=${encodeURIComponent(token)}`;
   }
+
+  async exportZipUrl(bookId: string, format: 'mp3' | 'opus' = 'mp3'): Promise<string> {
+    const token = await this.getToken();
+    return `${environment.apiUrl}/books/${bookId}/export?format=${format}&t=${encodeURIComponent(token)}`;
+  }
+
+  invalidate(): void {
+    this.currentToken.set(null);
+    this.expiresAtMs = 0;
+  }
 }

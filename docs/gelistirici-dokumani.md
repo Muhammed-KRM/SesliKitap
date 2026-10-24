@@ -3200,7 +3200,7 @@ Projenin en kritik iş servisi.
 
 #### `Services/ExportManager.cs`
 - `WriteZipAsync(bookId, format, Stream output, ct)`: `ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true)`, `CompressionLevel.NoCompression` (ses zaten sıkıştırılmış); her hazır bölüm için `NN - Bölüm Başlığı.mp3|opus` girdisine MinIO'dan doğrudan akıtma; `cover.jpg`; `playlist.m3u` (`#EXTINF:süre,başlık`). Dosya adları `TurkishTextHelper.Slugify`'dan değil, okunabilir ama güvenli (geçersiz karakterler temizlenmiş) Türkçe adlarla.
-- Not: `Response.Body` senkron olmayan yazmayı gerektirir; `ZipArchive` senkron I/O yapar → `AllowSynchronousIO` açılmaz; bunun yerine çıktı `System.IO.Pipelines` ile değil, `ZipArchive` + `await entryStream.FlushAsync()` desenini destekleyen .NET 10'daki async ZIP API'leri (varsa `ZipArchive.CreateAsync`) kullanılır; yoksa geçici dosyaya yazıp akıtma (300 MB üst sınır) uygulanır. Karar Faz 6'da ADR ile kaydedilir.
+- Not: `Response.Body` senkron olmayan yazmayı gerektirir; `ZipArchive` senkron I/O yapar → `AllowSynchronousIO` açılmaz; bunun yerine çıktı `System.IO.Pipelines` ile değil, `ZipArchive` + `await entryStream.FlushAsync()` desenini destekleyen .NET 10'daki async ZIP API'leri (varsa `ZipArchive.CreateAsync`) kullanılır; yoksa geçici dosyaya yazıp akıtma (300 MB üst sınır) uygulanır. Karar Faz 6'da `docs/kararlar/ADR-004-zip-akis-bellek-yonetimi.md` ile kaydedilmiştir (`FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.DeleteOnClose` bayraklı geçici `FileStream` üzerine `ZipArchive` yazılıp ardından `CopyToAsync(output, 65536)` ile asenkron akıtılır).
 
 #### `Services/DiscoveryManager.cs` (F7)
 1. Sorgu doğrulama (2–200 karakter), normalize et.

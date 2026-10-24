@@ -14,13 +14,15 @@ public sealed class BooksController : BaseApiController
 {
     private const long MaxUploadFormBytes = 315_621_376; // 301 MB (300 MB dosya + multipart başlıkları)
     private readonly IBookService _bookService;
+    private readonly IExportService _exportService;
 
     /// <summary>
     /// <see cref="BooksController"/> sınıfının yeni bir örneğini başlatır.
     /// </summary>
-    public BooksController(IBookService bookService)
+    public BooksController(IBookService bookService, IExportService exportService)
     {
         _bookService = bookService;
+        _exportService = exportService;
     }
 
     /// <summary>
@@ -155,5 +157,30 @@ public sealed class BooksController : BaseApiController
     {
         var (stream, contentType, fileName) = await _bookService.OpenSourceAsync(id, ct);
         return File(stream, contentType, fileName);
+    }
+
+    /// <summary>
+    /// Kitabın hazır bölümlerini, kapak görselini ve <c>playlist.m3u</c> dosyasını ZIP arşivi olarak akıtır.
+    /// </summary>
+    [HttpGet("{id:guid}/export")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Export(
+        Guid id,
+        [FromQuery] string format = "mp3",
+        CancellationToken ct = default)
+    {
+        var zipFileName = await _exportService.GetZipFileNameAsync(id, format, ct);
+        Response.ContentType = "application/zip";
+        var contentDisposition = new System.Net.Mime.ContentDisposition
+        {
+            FileName = Uri.EscapeDataString(zipFileName),
+            Inline = false
+        };
+        Response.Headers.ContentDisposition = contentDisposition.ToString();
+
+        await _exportService.WriteZipAsync(id, format, Response.Body, ct);
+        return new EmptyResult();
     }
 }

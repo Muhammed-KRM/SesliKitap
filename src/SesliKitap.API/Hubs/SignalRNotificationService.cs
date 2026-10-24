@@ -221,6 +221,50 @@ public sealed partial class SignalRNotificationService : INotificationService
         }
     }
 
+    /// <inheritdoc />
+    public async Task ProgressUpdatedAsync(
+        Guid bookId,
+        Guid chapterId,
+        int bolumSiraNo,
+        double pozisyonSn,
+        double oynatmaHizi,
+        string cihazKimligi,
+        string? cihazAdi,
+        DateTime istemciZamani,
+        string? senderConnectionId = null,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var payload = new ProgressUpdatedMessage(
+                bookId,
+                chapterId,
+                bolumSiraNo,
+                pozisyonSn,
+                oynatmaHizi,
+                cihazKimligi,
+                cihazAdi,
+                istemciZamani);
+
+            if (!string.IsNullOrWhiteSpace(senderConnectionId))
+            {
+                await _hubContext.Clients
+                    .GroupExcept(HubGroups.Book(bookId), new[] { senderConnectionId })
+                    .ProgressUpdated(payload);
+            }
+            else
+            {
+                await _hubContext.Clients
+                    .Group(HubGroups.Book(bookId))
+                    .ProgressUpdated(payload);
+            }
+        }
+        catch (Exception ex)
+        {
+            LogNotificationWarning(_logger, nameof(ProgressUpdatedAsync), ex);
+        }
+    }
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "SignalR bildirimi gönderilemedi ({MethodName}); iş akışı devam ediyor.")]
     private static partial void LogNotificationWarning(ILogger logger, string methodName, Exception ex);
 }

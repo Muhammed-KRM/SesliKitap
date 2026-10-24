@@ -178,6 +178,8 @@ public sealed class ApiKeyAuthMiddleware
                 path.EndsWith("/audio", StringComparison.OrdinalIgnoreCase))
                || (path.StartsWith("/api/books/", StringComparison.OrdinalIgnoreCase) &&
                    (path.EndsWith("/cover", StringComparison.OrdinalIgnoreCase) ||
+                    path.EndsWith("/export", StringComparison.OrdinalIgnoreCase) ||
+                    path.EndsWith("/source", StringComparison.OrdinalIgnoreCase) ||
                     path.Contains("/export/", StringComparison.OrdinalIgnoreCase)))
                || (path.StartsWith("/api/voice-profiles/", StringComparison.OrdinalIgnoreCase) &&
                    path.EndsWith("/sample", StringComparison.OrdinalIgnoreCase));

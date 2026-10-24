@@ -36,6 +36,9 @@ public partial class AppDbContext : DbContext
     /// <summary>Seslendirme işlerine dahil edilen bölümler tablosu.</summary>
     public virtual DbSet<SynthesisJobChapter> SynthesisJobChapters => Set<SynthesisJobChapter>();
 
+    /// <summary>Kitap dinleme konumları tablosu.</summary>
+    public virtual DbSet<ListeningProgress> ListeningProgresses => Set<ListeningProgress>();
+
     /// <summary>HTTP uç noktası (endpoint) istek/yanıt logları (Katman 1).</summary>
     public virtual DbSet<EndpointLog> EndpointLogs => Set<EndpointLog>();
 
