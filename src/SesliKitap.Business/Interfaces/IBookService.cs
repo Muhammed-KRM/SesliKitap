@@ -29,6 +29,11 @@ public interface IBookService
     Task<BookDetailDto> UploadAsync(BookUploadRequest request, string traceId, CancellationToken ct = default);
 
     /// <summary>
+    /// Keşif ekranından seçilen dış kaynaklı bir kitabı kütüphaneye kaydeder ve indirme/işleme olayını yayınlar.
+    /// </summary>
+    Task<BookDetailDto> ImportAsync(BookImportRequest request, string traceId, CancellationToken ct = default);
+
+    /// <summary>
     /// Kitap üst bilgilerini (başlık, yazar, açıklama, varsayılan ses profili) günceller.
     /// </summary>
     Task<BookDetailDto> UpdateAsync(Guid id, BookUpdateRequest request, CancellationToken ct = default);

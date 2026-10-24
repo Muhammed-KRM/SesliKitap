@@ -5,9 +5,11 @@ from typing import Any
 import fitz
 
 from consumers.base_consumer import BaseConsumer
+from discovery.safe_downloader import SafeDownloader
 from models.events import (
     BookImportRequestedEvent,
     BookProcessedEvent,
+    BookSourceStoredEvent,
     DosyaFormati,
     ProcessedBookMeta,
     ProcessedBookStats,
@@ -49,11 +51,13 @@ class BookImportConsumer(BaseConsumer[BookImportRequestedEvent]):
         minio_client: MinioStorageClient | None = None,
         publisher: RabbitMQPublisher | None = None,
         pipeline_logger: PipelineLogger | None = None,
+        downloader: SafeDownloader | None = None,
     ) -> None:
         super().__init__(publisher=publisher, pipeline_logger=pipeline_logger)
         self.minio = minio_client or MinioStorageClient()
         self.scanned_detector = ScannedPdfDetector()
         self.metadata_resolver = MetadataResolver()
+        self.downloader = downloader or SafeDownloader()
 
     def handle(self, message: BookImportRequestedEvent) -> None:
         book_id = message.book_id
@@ -85,10 +89,35 @@ class BookImportConsumer(BaseConsumer[BookImportRequestedEvent]):
 
             if message.orijinal_dosya_yolu:
                 self.minio.download_file(message.orijinal_dosya_yolu, local_source)
+            elif message.indirme_url:
+                detected_fmt, size_bytes, file_hash = self.downloader.download(
+                    message.indirme_url,
+                    local_source,
+                    ext,
+                )
+                source_key = f"books/{book_id}/source/original.{ext}"
+                content_type = (
+                    "application/epub+zip"
+                    if ext == "epub"
+                    else "application/pdf"
+                    if ext == "pdf"
+                    else "text/plain; charset=utf-8"
+                )
+                self.minio.upload_file(source_key, local_source, content_type=content_type)
+                self.publisher.publish_book_source_stored(
+                    BookSourceStoredEvent(
+                        trace_id=trace_id,
+                        book_id=book_id,
+                        orijinal_dosya_yolu=source_key,
+                        dosya_formati=detected_fmt,
+                        dosya_boyutu=size_bytes,
+                        dosya_hash=file_hash,
+                    )
+                )
             else:
                 raise ProcessingError(
                     "MISSING_SOURCE_PATH",
-                    "Kitap kaynak dosya yolu bulunamadı.",
+                    "Kitap kaynak dosya yolu veya indirme adresi bulunamadı.",
                     recoverable=False,
                 )
 

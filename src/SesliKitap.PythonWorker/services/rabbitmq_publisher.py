@@ -9,6 +9,7 @@ import pika
 from config import settings
 from models.events import (
     BookProcessedEvent,
+    BookSourceStoredEvent,
     ChapterSynthesizedEvent,
     IntegrationEventBase,
     PipelineErrorEvent,
@@ -92,6 +93,10 @@ class RabbitMQPublisher:
                     self._close()
                     if attempt == 1:
                         raise
+
+    def publish_book_source_stored(self, event: BookSourceStoredEvent) -> None:
+        """BookSourceStoredEvent yayınlar."""
+        self.publish_raw(Exchanges.BOOK_SOURCE_STORED, event)
 
     def publish_book_processed(self, event: BookProcessedEvent) -> None:
         """BookProcessedEvent yayınlar."""

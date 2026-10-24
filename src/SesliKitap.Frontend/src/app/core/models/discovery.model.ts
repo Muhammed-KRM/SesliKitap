@@ -1,21 +1,54 @@
 import { DosyaFormati, KitapKaynagi } from './enums';
 
-export interface DiscoveryFormatOption {
-  format: DosyaFormati;
-  indirmeUrl: string;
-  boyutBayt: number | null;
+export interface DiscoveryProviderDto {
+  kod: string;
+  ad: string;
+  kaynakTipi: KitapKaynagi;
+  etkinMi: boolean;
+  telifUyarisiGerekliMi: boolean;
 }
 
-export interface DiscoveryItem {
-  kaynak: KitapKaynagi;
+export interface DiscoveryFileDto {
+  dosyaAdi: string;
+  format: DosyaFormati;
+  boyutBayt: number | null;
+  indirmeUrl: string;
+}
+
+export interface DiscoverySourceBadgeDto {
+  saglayiciKodu: string;
+  kaynakTipi: KitapKaynagi;
+  kaynakKimligi: string;
+  sayfaUrl: string | null;
+}
+
+export interface DiscoveryResultDto {
+  saglayiciKodu: string;
+  kaynakTipi: KitapKaynagi;
   kaynakKimligi: string;
   baslik: string;
   yazar: string | null;
   yayinYili: number | null;
-  dil: string | null;
+  dil: string;
   kapakUrl: string | null;
-  aciklama: string | null;
-  mevcutFormatlar: DiscoveryFormatOption[];
-  kutuphanedeVarMi: boolean;
-  mevcutKitapId: string | null;
+  sayfaUrl: string | null;
+  indirmeSayisi: number;
+  mevcutFormatlar: DosyaFormati[];
+  dosyalar: DiscoveryFileDto[];
+  kaynaklar: DiscoverySourceBadgeDto[];
+  puan: number;
+  dogrulanmamisWebKaynagi: boolean;
+  kutuphanedeVar: boolean;
+  mevcutBookId: string | null;
+}
+
+export interface BookImportRequest {
+  kaynakTipi: KitapKaynagi;
+  kaynakKimligi: string;
+  indirmeUrl: string;
+  dosyaFormati: DosyaFormati;
+  baslik: string;
+  yazar?: string | null;
+  yayinYili?: number | null;
+  kapakUrl?: string | null;
 }

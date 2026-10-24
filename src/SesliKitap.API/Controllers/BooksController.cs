@@ -82,6 +82,22 @@ public sealed class BooksController : BaseApiController
     }
 
     /// <summary>
+    /// Keşif ekranından seçilen dış kaynaklı kitabı kütüphaneye ekler ve indirme/işleme sürecini başlatır.
+    /// </summary>
+    [HttpPost("import")]
+    [EnableRateLimiting("upload")]
+    [ProducesResponseType(typeof(BookDetailDto), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<BookDetailDto>> Import(
+        [FromBody] BookImportRequest request,
+        CancellationToken ct = default)
+    {
+        var detail = await _bookService.ImportAsync(request, TraceId, ct);
+        return AcceptedAtAction(nameof(GetById), new { id = detail.Id }, detail);
+    }
+
+    /// <summary>
     /// Kitabın başlık, yazar, açıklama ve varsayılan ses profili bilgilerini günceller.
     /// </summary>
     [HttpPut("{id:guid}")]

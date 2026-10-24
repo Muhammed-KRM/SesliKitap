@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Minio;
 using SesliKitap.Business.Infrastructure.Cache;
+using SesliKitap.Business.Infrastructure.Discovery;
 using SesliKitap.Business.Infrastructure.Messaging;
 using SesliKitap.Business.Infrastructure.Storage;
 using SesliKitap.Business.Infrastructure.Time;
@@ -67,6 +68,11 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<DiscoveryOptions>()
+            .Bind(configuration.GetSection(DiscoveryOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         // 2) FluentValidation doğrulayıcıları
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -115,6 +121,18 @@ public static class DependencyInjection
         services.AddScoped<ISynthesisService, SynthesisManager>();
         services.AddScoped<IProgressService, ProgressManager>();
         services.AddScoped<IExportService, ExportManager>();
+
+        // 6.1) Faz 7 — Kitap Keşfi Sağlayıcıları ve Servisi
+        services.AddHttpClient<InternetArchiveSearchProvider>();
+        services.AddHttpClient<OpenLibrarySearchProvider>();
+        services.AddHttpClient<GutendexSearchProvider>();
+        services.AddHttpClient<SearxngSearchProvider>();
+
+        services.AddScoped<IBookSearchProvider>(sp => sp.GetRequiredService<InternetArchiveSearchProvider>());
+        services.AddScoped<IBookSearchProvider>(sp => sp.GetRequiredService<OpenLibrarySearchProvider>());
+        services.AddScoped<IBookSearchProvider>(sp => sp.GetRequiredService<GutendexSearchProvider>());
+        services.AddScoped<IBookSearchProvider>(sp => sp.GetRequiredService<SearxngSearchProvider>());
+        services.AddScoped<IDiscoveryService, DiscoveryManager>();
 
         // 7) MassTransit + RabbitMQ (Python uyumu için Raw JSON)
         services.AddMassTransit(x =>

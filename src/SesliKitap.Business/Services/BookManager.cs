@@ -33,6 +33,7 @@ public sealed class BookManager : IBookService
     private readonly ILogService _logService;
     private readonly IValidator<BookUploadRequest> _uploadValidator;
     private readonly IValidator<BookUpdateRequest> _updateValidator;
+    private readonly IValidator<BookImportRequest>? _importValidator;
     private readonly CacheOptions _cacheOptions;
 
     /// <summary>
@@ -49,7 +50,8 @@ public sealed class BookManager : IBookService
         IValidator<BookUploadRequest> uploadValidator,
         IValidator<BookUpdateRequest> updateValidator,
         IOptions<CacheOptions> cacheOptions,
-        ISynthesisJobRepository? jobRepository = null)
+        ISynthesisJobRepository? jobRepository = null,
+        IValidator<BookImportRequest>? importValidator = null)
     {
         _bookRepository = bookRepository;
         _chapterRepository = chapterRepository;
@@ -61,6 +63,7 @@ public sealed class BookManager : IBookService
         _logService = logService;
         _uploadValidator = uploadValidator;
         _updateValidator = updateValidator;
+        _importValidator = importValidator;
         _cacheOptions = cacheOptions.Value;
     }
 
@@ -230,6 +233,88 @@ public sealed class BookManager : IBookService
 
         await _cache.RemoveByPrefixAsync(CacheKeys.BookListPrefix, ct);
         await _notifications.BookStatusChangedAsync(bookId, KitapDurumu.Isleniyor, ct);
+
+        return await BuildDetailDtoAsync(bookId, ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<BookDetailDto> ImportAsync(BookImportRequest request, string traceId, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (_importValidator is not null)
+        {
+            var validation = await _importValidator.ValidateAsync(request, ct);
+            if (!validation.IsValid)
+            {
+                var message = string.Join(" ", validation.Errors.Select(e => e.ErrorMessage));
+                throw new BusinessException(message);
+            }
+        }
+
+        var existing = await _bookRepository.FindBySourceAsync(request.KaynakTipi, request.KaynakKimligi.Trim(), ct);
+        if (existing is not null)
+        {
+            throw new ConflictException("Bu kitap zaten kütüphanenizde.", existing.Id);
+        }
+
+        var bookId = Guid.CreateVersion7();
+        var extNoDot = ContentTypeMap.ToExtension(request.DosyaFormati);
+
+        var book = new Book
+        {
+            Id = bookId,
+            Baslik = request.Baslik.Trim(),
+            Yazar = string.IsNullOrWhiteSpace(request.Yazar) ? null : request.Yazar.Trim(),
+            YayinYili = request.YayinYili,
+            Dil = "tr",
+            KaynakTipi = request.KaynakTipi,
+            KaynakKimligi = request.KaynakKimligi.Trim(),
+            KaynakUrl = request.IndirmeUrl.Trim(),
+            DosyaFormati = request.DosyaFormati,
+            Durum = KitapDurumu.Indiriliyor
+        };
+
+        await _bookRepository.AddAsync(book, ct);
+        await _bookRepository.SaveChangesAsync(ct);
+
+        var pipelineCtx = new PipelineLogContext(bookId, null, null, traceId, "Api");
+        var logId = await _logService.LogPipelineStartAsync(
+            pipelineCtx,
+            nameof(PipelineAsamasi.Indirme),
+            JsonSerializer.Serialize(new { request.KaynakTipi, request.KaynakKimligi, format = extNoDot }),
+            ct);
+
+        try
+        {
+            var importEvent = new BookImportRequestedEvent
+            {
+                TraceId = traceId,
+                BookId = bookId,
+                KaynakTipi = request.KaynakTipi,
+                IndirmeUrl = request.IndirmeUrl.Trim(),
+                DosyaFormati = request.DosyaFormati,
+                BeklenenFormat = extNoDot
+            };
+
+            await _eventPublisher.PublishAsync(importEvent, ct);
+            await _logService.LogPipelineEndAsync(logId, JsonSerializer.Serialize(new { queued = true }), ct);
+        }
+        catch (Exception ex)
+        {
+            await _logService.LogPipelineErrorAsync(logId, ex, ct);
+            await _logService.LogFunctionErrorAsync(ErrorCodes.BookUploadError, ex, new { bookId, request.KaynakKimligi }, traceId, ct: ct);
+            await _bookRepository.UpdateStatusAsync(
+                bookId,
+                KitapDurumu.Hata,
+                "Kitap indirme kuyruğuna gönderilemedi.",
+                ct);
+
+            throw new ExternalServiceException("RabbitMQ", "Kitap indirme kuyruğuna gönderilemedi.", ex);
+        }
+
+        await _cache.RemoveByPrefixAsync(CacheKeys.BookListPrefix, ct);
+        await _notifications.BookStatusChangedAsync(bookId, KitapDurumu.Indiriliyor, ct);
 
         return await BuildDetailDtoAsync(bookId, ct);
     }

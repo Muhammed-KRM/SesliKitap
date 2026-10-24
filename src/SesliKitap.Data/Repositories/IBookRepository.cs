@@ -44,6 +44,16 @@ public interface IBookRepository : IRepository<Book>
     Task<Book?> FindByHashAsync(string hash, CancellationToken ct = default);
 
     /// <summary>
+    /// Verilen dış kaynak tipi ve kaynak kimliğine sahip (silinmemiş) kitabı bulur.
+    /// </summary>
+    Task<Book?> FindBySourceAsync(KaynakTipi kaynakTipi, string kaynakKimligi, CancellationToken ct = default);
+
+    /// <summary>
+    /// Kütüphanedeki tüm dış kaynaklı kitapların <c>(KaynakTipi, KaynakKimligi) -&gt; BookId</c> eşlemesini getirir.
+    /// </summary>
+    Task<IReadOnlyDictionary<(KaynakTipi Tip, string Kimlik), Guid>> GetExistingSourceMapAsync(CancellationToken ct = default);
+
+    /// <summary>
     /// Filtreleme, sıralama ve sayfalama kriterlerine göre kitap listesini projeksiyonla getirir.
     /// </summary>
     /// <param name="arama">Başlık veya yazar arama metni.</param>

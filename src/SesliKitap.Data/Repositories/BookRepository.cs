@@ -27,6 +27,35 @@ public sealed class BookRepository : GenericRepository<Book>, IBookRepository
     }
 
     /// <inheritdoc />
+    public async Task<Book?> FindBySourceAsync(KaynakTipi kaynakTipi, string kaynakKimligi, CancellationToken ct = default)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(b => b.KaynakTipi == kaynakTipi && b.KaynakKimligi == kaynakKimligi, ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<(KaynakTipi Tip, string Kimlik), Guid>> GetExistingSourceMapAsync(CancellationToken ct = default)
+    {
+        var rows = await DbSet
+            .AsNoTracking()
+            .Where(b => b.KaynakKimligi != null && b.KaynakTipi != KaynakTipi.Yukleme)
+            .Select(b => new { b.Id, b.KaynakTipi, b.KaynakKimligi })
+            .ToListAsync(ct);
+
+        var dict = new Dictionary<(KaynakTipi, string), Guid>();
+        foreach (var r in rows)
+        {
+            if (!string.IsNullOrWhiteSpace(r.KaynakKimligi))
+            {
+                dict[(r.KaynakTipi, r.KaynakKimligi)] = r.Id;
+            }
+        }
+
+        return dict;
+    }
+
+    /// <inheritdoc />
     public async Task<(IReadOnlyList<BookListRow> Items, int Toplam)> GetPagedListAsync(
         string? arama,
         KitapDurumu? durum,

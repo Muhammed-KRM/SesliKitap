@@ -84,6 +84,16 @@ class BookImportRequestedEvent(IntegrationEventBase):
     ayarlar: ProcessingSettingsModel = Field(default_factory=ProcessingSettingsModel)
 
 
+class BookSourceStoredEvent(IntegrationEventBase):
+    """Keşiften indirilen kaynak dosya doğrulandıktan ve MinIO'ya kaydedildikten sonra yayınlanan olay."""
+
+    book_id: str
+    orijinal_dosya_yolu: str
+    dosya_formati: DosyaFormati
+    dosya_boyutu: int
+    dosya_hash: str
+
+
 class ProcessedBookMeta(CamelModel):
     """Çıkarılan kitap meta verisi."""
 

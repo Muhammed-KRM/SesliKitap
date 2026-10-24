@@ -26,6 +26,7 @@ builder.Services
     .AddDataLayer(connectionString)
     .AddBusinessLayer(builder.Configuration, bus =>
     {
+        bus.AddConsumer<BookSourceStoredConsumer>();
         bus.AddConsumer<BookProcessedConsumer>();
         bus.AddConsumer<PipelineStageChangedConsumer>();
         bus.AddConsumer<PipelineErrorConsumer>();

@@ -49,6 +49,55 @@ public sealed partial class BookProcessingResultHandler
     }
 
     /// <summary>
+    /// Keşiften indirilen kaynak dosyanın MinIO'ya kaydedildiğini işler; SHA-256 çakışması varsa yeni kaydı iptal eder.
+    /// </summary>
+    public async Task HandleSourceStoredAsync(BookSourceStoredEvent e, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+
+        var book = await _bookRepository.GetByIdAsync(e.BookId, ct);
+        if (book is null)
+        {
+            LogBookNotFound(_logger, e.BookId);
+            return;
+        }
+
+        var duplicate = await _bookRepository.FindByHashAsync(e.DosyaHash, ct);
+        if (duplicate is not null && duplicate.Id != e.BookId)
+        {
+            await _storage.DeleteByPrefixAsync(StorageKeys.BookPrefix(e.BookId), ct);
+            _bookRepository.Delete(book);
+            await _bookRepository.SaveChangesAsync(ct);
+
+            await _cache.RemoveAsync(CacheKeys.Book(e.BookId), ct);
+            await _cache.RemoveByPrefixAsync(CacheKeys.BookListPrefix, ct);
+
+            await _notifications.PipelineErrorAsync(
+                e.BookId,
+                null,
+                null,
+                nameof(PipelineAsamasi.Indirme),
+                $"Bu kitap zaten kütüphanenizde mevcut (Id: {duplicate.Id}).",
+                false,
+                ct);
+            return;
+        }
+
+        book.OrijinalDosyaYolu = e.OrijinalDosyaYolu;
+        book.DosyaFormati = e.DosyaFormati;
+        book.DosyaBoyutu = e.DosyaBoyutu;
+        book.DosyaHash = e.DosyaHash;
+        book.Durum = KitapDurumu.Isleniyor;
+
+        _bookRepository.Update(book);
+        await _bookRepository.SaveChangesAsync(ct);
+
+        await _cache.RemoveAsync(CacheKeys.Book(e.BookId), ct);
+        await _cache.RemoveByPrefixAsync(CacheKeys.BookListPrefix, ct);
+        await _notifications.BookStatusChangedAsync(e.BookId, KitapDurumu.Isleniyor, ct);
+    }
+
+    /// <summary>
     /// Worker tarafından tamamlanan kitap metin çıkarma ve bölümleme sonucunu veritabanına kaydeder.
     /// </summary>
     public async Task HandleBookProcessedAsync(BookProcessedEvent e, CancellationToken ct = default)
