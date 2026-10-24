@@ -6,6 +6,7 @@ using SesliKitap.Business.DTOs.Book;
 using SesliKitap.Business.DTOs.Chapter;
 using SesliKitap.Business.DTOs.Common;
 using SesliKitap.Business.DTOs.Logs;
+using SesliKitap.Business.DTOs.Synthesis;
 using SesliKitap.Business.Events;
 using SesliKitap.Business.Exceptions;
 using SesliKitap.Business.Helpers;
@@ -24,6 +25,7 @@ public sealed class BookManager : IBookService
 {
     private readonly IBookRepository _bookRepository;
     private readonly IChapterRepository _chapterRepository;
+    private readonly ISynthesisJobRepository? _jobRepository;
     private readonly IFileStorageService _storage;
     private readonly ICacheService _cache;
     private readonly IEventPublisher _eventPublisher;
@@ -46,10 +48,12 @@ public sealed class BookManager : IBookService
         ILogService logService,
         IValidator<BookUploadRequest> uploadValidator,
         IValidator<BookUpdateRequest> updateValidator,
-        IOptions<CacheOptions> cacheOptions)
+        IOptions<CacheOptions> cacheOptions,
+        ISynthesisJobRepository? jobRepository = null)
     {
         _bookRepository = bookRepository;
         _chapterRepository = chapterRepository;
+        _jobRepository = jobRepository;
         _storage = storage;
         _cache = cache;
         _eventPublisher = eventPublisher;
@@ -420,6 +424,40 @@ public sealed class BookManager : IBookService
             }
         }
 
+        SynthesisJobDto? activeJobDto = null;
+        if (_jobRepository is not null)
+        {
+            var activeJob = await _jobRepository.GetActiveJobForBookAsync(id, ct);
+            if (activeJob is not null)
+            {
+                activeJobDto = new SynthesisJobDto(
+                    activeJob.Id,
+                    activeJob.BookId,
+                    book.Baslik,
+                    activeJob.VoiceProfileId,
+                    activeJob.VoiceProfile?.Ad ?? string.Empty,
+                    activeJob.Durum,
+                    activeJob.Yuzde,
+                    activeJob.ToplamBolum,
+                    activeJob.TamamlananBolum,
+                    activeJob.HataliBolum,
+                    activeJob.MevcutBolumId,
+                    activeJob.Mesaj,
+                    activeJob.MotorSirasi,
+                    activeJob.KullanilanMotorlar,
+                    activeJob.GpuMs,
+                    activeJob.TahminiMaliyetUsd,
+                    activeJob.TahminiSureSn,
+                    activeJob.UretilenSesSn,
+                    activeJob.OnbellektenParca,
+                    activeJob.UretilenParca,
+                    activeJob.HataMesaji,
+                    activeJob.OlusturmaTarihi,
+                    activeJob.BaslangicZamani,
+                    activeJob.BitisZamani);
+            }
+        }
+
         return new BookDetailDto(
             book.Id,
             book.Baslik,
@@ -440,7 +478,8 @@ public sealed class BookManager : IBookService
             chapters,
             statsElement,
             book.OlusturmaTarihi,
-            book.SonDinlenmeTarihi);
+            book.SonDinlenmeTarihi,
+            activeJobDto);
     }
 
     private static BookListDto MapToListDto(BookListRow r) =>

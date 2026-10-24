@@ -35,6 +35,7 @@ public static class ServiceRegistration
         services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IChapterRepository, ChapterRepository>();
         services.AddScoped<IVoiceProfileRepository, VoiceProfileRepository>();
+        services.AddScoped<ISynthesisJobRepository, SynthesisJobRepository>();
 
         return services;
     }

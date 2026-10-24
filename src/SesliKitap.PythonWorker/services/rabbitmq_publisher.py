@@ -9,9 +9,11 @@ import pika
 from config import settings
 from models.events import (
     BookProcessedEvent,
+    ChapterSynthesizedEvent,
     IntegrationEventBase,
     PipelineErrorEvent,
     PipelineStageChangedEvent,
+    SynthesisCompletedEvent,
     VoiceProfileReadyEvent,
 )
 from utils.constants import Exchanges
@@ -98,6 +100,14 @@ class RabbitMQPublisher:
     def publish_voice_profile_ready(self, event: VoiceProfileReadyEvent) -> None:
         """VoiceProfileReadyEvent yayınlar."""
         self.publish_raw(Exchanges.VOICE_PROFILE_READY, event)
+
+    def publish_chapter_synthesized(self, event: ChapterSynthesizedEvent) -> None:
+        """ChapterSynthesizedEvent yayınlar."""
+        self.publish_raw(Exchanges.CHAPTER_SYNTHESIZED, event)
+
+    def publish_synthesis_completed(self, event: SynthesisCompletedEvent) -> None:
+        """SynthesisCompletedEvent yayınlar."""
+        self.publish_raw(Exchanges.SYNTHESIS_COMPLETED, event)
 
     def publish_stage_changed(
         self,

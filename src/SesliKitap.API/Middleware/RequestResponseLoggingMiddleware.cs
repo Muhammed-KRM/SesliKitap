@@ -59,7 +59,8 @@ public sealed class RequestResponseLoggingMiddleware
         var isInternalLogEndpoint = path.StartsWith("/api/internal/logs", StringComparison.OrdinalIgnoreCase);
         var isMultipart = context.Request.HasFormContentType ||
                           (context.Request.ContentType?.Contains("multipart/", StringComparison.OrdinalIgnoreCase) ?? false);
-        var isStreamingEndpoint = StreamPathSuffixes.Any(s => path.EndsWith(s, StringComparison.OrdinalIgnoreCase));
+        var isStreamingEndpoint = StreamPathSuffixes.Any(s => path.EndsWith(s, StringComparison.OrdinalIgnoreCase)) ||
+                                  path.Contains("/export/", StringComparison.OrdinalIgnoreCase);
 
         var skipBodyBuffering = isInternalLogEndpoint || isMultipart || isStreamingEndpoint;
 

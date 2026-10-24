@@ -108,6 +108,10 @@ class Config(BaseSettings):
         validation_alias=AliasChoices("TTS_COLD_START_TIMEOUT_SEC", "tts_cold_start_timeout_sec"),
     )
     tts_max_retries: int = Field(default=3, validation_alias=AliasChoices("TTS_MAX_RETRIES", "tts_max_retries"))
+    tts_quality_max_retries: int = Field(
+        default=2,
+        validation_alias=AliasChoices("TTS_QUALITY_MAX_RETRIES", "tts_quality_max_retries"),
+    )
     tts_max_chunk_chars: int = Field(default=280, validation_alias=AliasChoices("TTS_MAX_CHUNK_CHARS", "tts_max_chunk_chars"))
     tts_min_chunk_chars: int = Field(default=25, validation_alias=AliasChoices("TTS_MIN_CHUNK_CHARS", "tts_min_chunk_chars"))
     tts_transfer_sample_rate: int = 24000

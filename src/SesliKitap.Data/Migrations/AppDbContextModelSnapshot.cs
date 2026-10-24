@@ -567,6 +567,174 @@ namespace SesliKitap.Data.Migrations
                     b.ToTable("pipeline_logs", (string)null);
                 });
 
+            modelBuilder.Entity("SesliKitap.Data.Entities.SynthesisJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("BaslangicZamani")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("baslangic_zamani");
+
+                    b.Property<DateTime?>("BitisZamani")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bitis_zamani");
+
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("book_id");
+
+                    b.Property<int>("Durum")
+                        .HasColumnType("integer")
+                        .HasColumnName("durum");
+
+                    b.Property<long>("GpuMs")
+                        .HasColumnType("bigint")
+                        .HasColumnName("gpu_ms");
+
+                    b.Property<DateTime?>("GuncellemeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("guncelleme_tarihi");
+
+                    b.Property<string>("HataMesaji")
+                        .HasColumnType("text")
+                        .HasColumnName("hata_mesaji");
+
+                    b.Property<int>("HataliBolum")
+                        .HasColumnType("integer")
+                        .HasColumnName("hatali_bolum");
+
+                    b.Property<string>("KullanilanMotorlar")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("kullanilan_motorlar");
+
+                    b.Property<string>("Mesaj")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("mesaj");
+
+                    b.Property<Guid?>("MevcutBolumId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mevcut_bolum_id");
+
+                    b.Property<string>("MotorSirasi")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("motor_sirasi");
+
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("olusturma_tarihi");
+
+                    b.Property<int>("OnbellektenParca")
+                        .HasColumnType("integer")
+                        .HasColumnName("onbellekten_parca");
+
+                    b.Property<DateTime?>("SonIlerlemeZamani")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("son_ilerleme_zamani");
+
+                    b.Property<decimal>("TahminiMaliyetUsd")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("numeric(10,4)")
+                        .HasColumnName("tahmini_maliyet_usd");
+
+                    b.Property<double?>("TahminiSureSn")
+                        .HasColumnType("double precision")
+                        .HasColumnName("tahmini_sure_sn");
+
+                    b.Property<int>("TamamlananBolum")
+                        .HasColumnType("integer")
+                        .HasColumnName("tamamlanan_bolum");
+
+                    b.Property<int>("ToplamBolum")
+                        .HasColumnType("integer")
+                        .HasColumnName("toplam_bolum");
+
+                    b.Property<int>("ToplamParca")
+                        .HasColumnType("integer")
+                        .HasColumnName("toplam_parca");
+
+                    b.Property<string>("TraceId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("trace_id");
+
+                    b.Property<int>("UretilenParca")
+                        .HasColumnType("integer")
+                        .HasColumnName("uretilen_parca");
+
+                    b.Property<double>("UretilenSesSn")
+                        .HasColumnType("double precision")
+                        .HasColumnName("uretilen_ses_sn");
+
+                    b.Property<Guid>("VoiceProfileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("voice_profile_id");
+
+                    b.Property<uint>("Xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<int>("Yuzde")
+                        .HasColumnType("integer")
+                        .HasColumnName("yuzde");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId")
+                        .HasDatabaseName("idx_synthesis_jobs_book_id");
+
+                    b.HasIndex("Durum")
+                        .HasDatabaseName("idx_synthesis_jobs_durum");
+
+                    b.HasIndex("OlusturmaTarihi")
+                        .HasDatabaseName("idx_synthesis_jobs_olusturma_tarihi");
+
+                    b.HasIndex("VoiceProfileId");
+
+                    b.ToTable("synthesis_jobs", (string)null);
+                });
+
+            modelBuilder.Entity("SesliKitap.Data.Entities.SynthesisJobChapter", b =>
+                {
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("ChapterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chapter_id");
+
+                    b.Property<int>("Durum")
+                        .HasColumnType("integer")
+                        .HasColumnName("durum");
+
+                    b.Property<long>("GpuMs")
+                        .HasColumnType("bigint")
+                        .HasColumnName("gpu_ms");
+
+                    b.Property<string>("HataMesaji")
+                        .HasColumnType("text")
+                        .HasColumnName("hata_mesaji");
+
+                    b.Property<int>("Sira")
+                        .HasColumnType("integer")
+                        .HasColumnName("sira");
+
+                    b.HasKey("JobId", "ChapterId");
+
+                    b.HasIndex("ChapterId");
+
+                    b.ToTable("synthesis_job_chapters", (string)null);
+                });
+
             modelBuilder.Entity("SesliKitap.Data.Entities.VoiceProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -684,6 +852,81 @@ namespace SesliKitap.Data.Migrations
                     b.Navigation("Book");
                 });
 
+            modelBuilder.Entity("SesliKitap.Data.Entities.SynthesisJob", b =>
+                {
+                    b.HasOne("SesliKitap.Data.Entities.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SesliKitap.Data.Entities.VoiceProfile", "VoiceProfile")
+                        .WithMany()
+                        .HasForeignKey("VoiceProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("SesliKitap.Data.Entities.SynthesisJobSettings", "Ayarlar", b1 =>
+                        {
+                            b1.Property<Guid>("SynthesisJobId");
+
+                            b1.Property<int>("BaslikSonrasiMs");
+
+                            b1.Property<bool>("BolumBasligiOku");
+
+                            b1.Property<int>("CumleArasiMs");
+
+                            b1.Property<int>("DiyalogMs");
+
+                            b1.Property<double>("HedefLufs");
+
+                            b1.Property<int>("Mp3BitrateKbps");
+
+                            b1.Property<int>("OpusBitrateKbps");
+
+                            b1.Property<int>("ParagrafArasiMs");
+
+                            b1.Property<bool>("SadeceEksikler");
+
+                            b1.HasKey("SynthesisJobId");
+
+                            b1.ToTable("synthesis_jobs");
+
+                            b1
+                                .ToJson("ayarlar")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SynthesisJobId");
+                        });
+
+                    b.Navigation("Ayarlar")
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("VoiceProfile");
+                });
+
+            modelBuilder.Entity("SesliKitap.Data.Entities.SynthesisJobChapter", b =>
+                {
+                    b.HasOne("SesliKitap.Data.Entities.BookChapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SesliKitap.Data.Entities.SynthesisJob", "Job")
+                        .WithMany("Bolumler")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chapter");
+
+                    b.Navigation("Job");
+                });
+
             modelBuilder.Entity("SesliKitap.Data.Entities.VoiceProfile", b =>
                 {
                     b.OwnsOne("SesliKitap.Data.Entities.VoiceParameters", "Parametreler", b1 =>
@@ -715,6 +958,11 @@ namespace SesliKitap.Data.Migrations
                 });
 
             modelBuilder.Entity("SesliKitap.Data.Entities.Book", b =>
+                {
+                    b.Navigation("Bolumler");
+                });
+
+            modelBuilder.Entity("SesliKitap.Data.Entities.SynthesisJob", b =>
                 {
                     b.Navigation("Bolumler");
                 });

@@ -30,6 +30,12 @@ public partial class AppDbContext : DbContext
     /// <summary>Ses profilleri tablosu.</summary>
     public virtual DbSet<VoiceProfile> VoiceProfiles => Set<VoiceProfile>();
 
+    /// <summary>Seslendirme (sentez) işleri tablosu.</summary>
+    public virtual DbSet<SynthesisJob> SynthesisJobs => Set<SynthesisJob>();
+
+    /// <summary>Seslendirme işlerine dahil edilen bölümler tablosu.</summary>
+    public virtual DbSet<SynthesisJobChapter> SynthesisJobChapters => Set<SynthesisJobChapter>();
+
     /// <summary>HTTP uç noktası (endpoint) istek/yanıt logları (Katman 1).</summary>
     public virtual DbSet<EndpointLog> EndpointLogs => Set<EndpointLog>();
 

@@ -29,4 +29,19 @@ public interface IAudiobookClient
     /// Ses profili hazırlama tamamlanma olayı.
     /// </summary>
     Task VoiceProfileReady(VoiceProfileReadyMessage message);
+
+    /// <summary>
+    /// Seslendirme ilerleme olayı.
+    /// </summary>
+    Task SynthesisProgress(SynthesisProgressMessage message);
+
+    /// <summary>
+    /// Bölüm sesi hazır olayı.
+    /// </summary>
+    Task ChapterReady(ChapterReadyMessage message);
+
+    /// <summary>
+    /// Seslendirme işi tamamlanma olayı.
+    /// </summary>
+    Task SynthesisCompleted(SynthesisCompletedMessage message);
 }

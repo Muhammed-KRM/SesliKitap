@@ -42,4 +42,43 @@ public interface INotificationService
         bool basarili,
         string? hataMesaji,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Seslendirme (sentez) işi ilerlemesini bildirir (<c>SynthesisProgress</c>).
+    /// </summary>
+    Task SynthesisProgressAsync(
+        Guid jobId,
+        Guid bookId,
+        Guid? chapterId,
+        int yuzde,
+        int bolumYuzde,
+        int tamamlananBolum,
+        int toplamBolum,
+        string mesaj,
+        long gpuMs,
+        double? tahminiKalanSn,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Bir bölümün seslendirmesi tamamlandığında bildirir (<c>ChapterReady</c>).
+    /// </summary>
+    Task ChapterReadyAsync(
+        Guid jobId,
+        Guid bookId,
+        Guid chapterId,
+        double sureSn,
+        string motor,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Seslendirme (sentez) işi tamamlandığında bildirir (<c>SynthesisCompleted</c>).
+    /// </summary>
+    Task SynthesisCompletedAsync(
+        Guid jobId,
+        Guid bookId,
+        string sonuc,
+        int tamamlananBolum,
+        int hataliBolum,
+        decimal maliyetUsd,
+        CancellationToken ct = default);
 }

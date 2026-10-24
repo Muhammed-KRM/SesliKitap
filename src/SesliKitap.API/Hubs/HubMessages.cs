@@ -45,3 +45,39 @@ public sealed record VoiceProfileReadyMessage(
     Guid VoiceProfileId,
     bool Basarili,
     string? HataMesaji);
+
+/// <summary>
+/// Seslendirme (sentez) işi ilerleme bildirimi yükü (<c>SynthesisProgress</c>).
+/// </summary>
+public sealed record SynthesisProgressMessage(
+    Guid JobId,
+    Guid BookId,
+    Guid? ChapterId,
+    int Yuzde,
+    int BolumYuzde,
+    int TamamlananBolum,
+    int ToplamBolum,
+    string Mesaj,
+    long GpuMs,
+    double? TahminiKalanSn);
+
+/// <summary>
+/// Bölüm sesi hazır bildirimi yükü (<c>ChapterReady</c>).
+/// </summary>
+public sealed record ChapterReadyMessage(
+    Guid JobId,
+    Guid BookId,
+    Guid ChapterId,
+    double SureSn,
+    string Motor);
+
+/// <summary>
+/// Sentez işi tamamlanma bildirimi yükü (<c>SynthesisCompleted</c>).
+/// </summary>
+public sealed record SynthesisCompletedMessage(
+    Guid JobId,
+    Guid BookId,
+    string Sonuc,
+    int TamamlananBolum,
+    int HataliBolum,
+    decimal MaliyetUsd);

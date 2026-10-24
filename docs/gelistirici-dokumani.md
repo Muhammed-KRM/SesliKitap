@@ -3214,7 +3214,7 @@ Projenin en kritik iş servisi.
 OtoEdit'teki sınıf temel alınır; her metot `try/catch (RedisException|RedisConnectionException|RedisTimeoutException)` → uyarı log + varsayılan değer (fail-open). `RemoveByPrefixAsync` → `server.KeysAsync(pattern: prefix + "*", pageSize: 500)` (SCAN). JSON: `JsonSerializerOptions(JsonSerializerDefaults.Web)`.
 
 #### `Infrastructure/Storage/MinioFileStorageService.cs`
-OtoEdit'teki `MinioFileStorageService` temel alınır; eklenenler: `CopyToAsync(offset,length)` (`WithOffsetAndLength`), `GetInfoAsync` (`StatObjectAsync`; `ObjectNotFoundException` → null), `DeleteByPrefixAsync` (`ListObjectsEnumAsync` + `RemoveObjectsAsync` 1000'lik partiler), `UploadJsonAsync/ReadJsonAsync`. Tüm hatalar `ExternalServiceException("MinIO", ...)` olarak sarılır.
+OtoEdit'teki `MinioFileStorageService` temel alınır; eklenenler: `CopyToAsync(offset,length)` (Not: `Minio 6.0.3` SDK'sında `WithOffsetAndLength` çağrısı HTTP `206 Partial Content` yanıtını `DefaultErrorHandler` üzerinden `PartialContentException` olarak fırlattığından ve `WithCallbackStream` delegesini atladığından, `CopyToAsync` içinde nesne akışı `WithCallbackStream` üzerinden okunup `ArrayPool<byte>.Shared` ile `(offset, length)` aralığında bellek tahsissiz dilimlenerek hedef akışa aktarılır), `GetInfoAsync` (`StatObjectAsync`; `ObjectNotFoundException` → null), `DeleteByPrefixAsync` (`ListObjectsEnumAsync` + `RemoveObjectsAsync` 1000'lik partiler), `UploadJsonAsync/ReadJsonAsync`. Tüm hatalar `ExternalServiceException("MinIO", ...)` olarak sarılır.
 
 #### `Infrastructure/Messaging/MassTransitEventPublisher.cs`
 ```csharp

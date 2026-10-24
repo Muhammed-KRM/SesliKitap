@@ -17,10 +17,10 @@ import numpy as np
 import pytest
 import soundfile as sf
 from fastapi.testclient import TestClient
-from tts_server.api import create_app  # noqa: E402
-from tts_server.config import TtsServerSettings  # noqa: E402
-from tts_server.engines.mock_engine import MockServerEngine  # noqa: E402
-from tts_server.voice_store import VoiceStore  # noqa: E402
+from tts_server.api import create_app
+from tts_server.config import TtsServerSettings
+from tts_server.engines.mock_engine import MockServerEngine
+from tts_server.voice_store import VoiceStore
 
 TEST_TOKEN = "test-bearer-token-32-characters-long"
 

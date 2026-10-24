@@ -30,8 +30,11 @@ builder.Services
         bus.AddConsumer<PipelineStageChangedConsumer>();
         bus.AddConsumer<PipelineErrorConsumer>();
         bus.AddConsumer<VoiceProfileReadyConsumer>();
+        bus.AddConsumer<ChapterSynthesizedConsumer>();
+        bus.AddConsumer<SynthesisCompletedConsumer>();
     })
     .AddScoped<INotificationService, SignalRNotificationService>()
+    .AddHostedService<StuckJobWatchdogService>()
     .AddHostedService<StorageCleanupBackgroundService>();
 
 var app = builder.Build();

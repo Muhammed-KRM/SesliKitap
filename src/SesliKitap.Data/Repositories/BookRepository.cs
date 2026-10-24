@@ -175,22 +175,4 @@ public sealed class BookRepository : GenericRepository<Book>, IBookRepository
             }
         }
     }
-
-    /// <inheritdoc />
-    public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken ct = default)
-    {
-        if (!Context.Database.IsRelational())
-        {
-            await action(ct);
-            return;
-        }
-
-        var strategy = Context.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(async token =>
-        {
-            await using var tx = await Context.Database.BeginTransactionAsync(token);
-            await action(token);
-            await tx.CommitAsync(token);
-        }, ct);
-    }
 }

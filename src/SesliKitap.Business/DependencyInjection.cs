@@ -109,7 +109,10 @@ public static class DependencyInjection
         services.AddScoped<IBookService, BookManager>();
         services.AddScoped<BookProcessingResultHandler>();
         services.AddScoped<IChapterService, ChapterManager>();
+        services.AddScoped<IChapterAudioService, ChapterAudioManager>();
         services.AddScoped<IVoiceProfileService, VoiceProfileManager>();
+        services.AddSingleton<ICostEstimator, CostEstimator>();
+        services.AddScoped<ISynthesisService, SynthesisManager>();
 
         // 7) MassTransit + RabbitMQ (Python uyumu için Raw JSON)
         services.AddMassTransit(x =>

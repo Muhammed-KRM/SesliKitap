@@ -92,4 +92,24 @@ public interface IChapterRepository : IRepository<BookChapter>
     /// <param name="dahilMi">Yeni dahil olma durumu.</param>
     /// <param name="ct">İptal belirteci.</param>
     Task UpdateInclusionBulkAsync(Guid bookId, IReadOnlyCollection<Guid> chapterIds, bool dahilMi, CancellationToken ct = default);
+
+    /// <summary>
+    /// Sentez işi başlatılırken veya maliyet tahmini yapılırken hedef bölümleri temiz metinleriyle sıra numarasına göre getirir.
+    /// </summary>
+    /// <param name="bookId">Kitap kimliği.</param>
+    /// <param name="chapterIds">Belirli bölüm kimlikleri (boşsa <c>DahilMi=true</c> olan tüm bölümler).</param>
+    /// <param name="onlyMissing">Yalnızca sesi hazır olmayan veya güncel olmayan bölümlerin mi seçileceği.</param>
+    /// <param name="ct">İptal belirteci.</param>
+    Task<IReadOnlyList<BookChapter>> GetForSynthesisAsync(
+        Guid bookId,
+        IReadOnlyList<Guid>? chapterIds,
+        bool onlyMissing,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Kitabın sesi hazır olan bölümlerinin toplam ses süresini yeniden hesaplayıp <c>books.toplam_sure_sn</c> alanını günceller.
+    /// </summary>
+    /// <param name="bookId">Kitap kimliği.</param>
+    /// <param name="ct">İptal belirteci.</param>
+    Task<double> RecalculateBookAudioDurationAsync(Guid bookId, CancellationToken ct = default);
 }

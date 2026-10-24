@@ -1,0 +1,182 @@
+# Türkçe Kısaltma Sözlüğü (Bölüm 4.15.6)
+# Alanlar:
+#   abbr: Kısaltma metni
+#   expansion: Seslendirme okunuşu
+#   case_sensitive: Büyük/küçük harf duyarlılığı (varsayılan: false)
+#   context: "before_number" | "after_number" | "any" (varsayılan: "any")
+#   read_as_word: Noktasız büyük harf kısaltmanın kelime gibi okunuşu
+
+# --- Unvanlar ve Hitaplar ---
+- { abbr: "Prof.", expansion: "Profesör", case_sensitive: true }
+- { abbr: "Dr.", expansion: "Doktor", case_sensitive: true }
+- { abbr: "Doç.", expansion: "Doçent", case_sensitive: true }
+- { abbr: "Yrd.", expansion: "Yardımcı", case_sensitive: true }
+- { abbr: "Öğr.", expansion: "Öğretim", case_sensitive: true }
+- { abbr: "Gör.", expansion: "Görevlisi", case_sensitive: true }
+- { abbr: "Arş.", expansion: "Araştırma", case_sensitive: true }
+- { abbr: "Uzm.", expansion: "Uzman", case_sensitive: true }
+- { abbr: "Op.", expansion: "Operatör", case_sensitive: true }
+- { abbr: "Av.", expansion: "Avukat", case_sensitive: true }
+- { abbr: "Müh.", expansion: "Mühendis", case_sensitive: true }
+- { abbr: "Mim.", expansion: "Mimar", case_sensitive: true }
+- { abbr: "Ecz.", expansion: "Eczacı", case_sensitive: true }
+- { abbr: "Vet.", expansion: "Veteriner", case_sensitive: true }
+- { abbr: "Diş.", expansion: "Diş Hekimi", case_sensitive: true }
+- { abbr: "Psk.", expansion: "Psikolog", case_sensitive: true }
+- { abbr: "Sn.", expansion: "Sayın", case_sensitive: true }
+- { abbr: "Hz.", expansion: "Hazreti", case_sensitive: true }
+- { abbr: "Alb.", expansion: "Albay", case_sensitive: true }
+- { abbr: "Yrb.", expansion: "Yarbay", case_sensitive: true }
+- { abbr: "Bnb.", expansion: "Binbaşı", case_sensitive: true }
+- { abbr: "Yzb.", expansion: "Yüzbaşı", case_sensitive: true }
+- { abbr: "Ütğm.", expansion: "Üsteğmen", case_sensitive: true }
+- { abbr: "Tğm.", expansion: "Teğmen", case_sensitive: true }
+- { abbr: "Astsb.", expansion: "Astsubay", case_sensitive: true }
+- { abbr: "Çvş.", expansion: "Çavuş", case_sensitive: true }
+- { abbr: "Onb.", expansion: "Onbaşı", case_sensitive: true }
+- { abbr: "Org.", expansion: "Orgeneral", case_sensitive: true }
+- { abbr: "Korg.", expansion: "Korgeneral", case_sensitive: true }
+- { abbr: "Tümg.", expansion: "Tümgeneral", case_sensitive: true }
+- { abbr: "Tuğg.", expansion: "Tuğgeneral", case_sensitive: true }
+- { abbr: "Oram.", expansion: "Oramiral", case_sensitive: true }
+- { abbr: "Bşk.", expansion: "Başkan", case_sensitive: true }
+- { abbr: "Md.", expansion: "Müdür", case_sensitive: true }
+- { abbr: "Gn.", expansion: "Genel", case_sensitive: true }
+
+# --- Akademik, Kitap ve Metin İçi Kısaltmalar ---
+- { abbr: "vb.", expansion: "ve benzeri" }
+- { abbr: "vs.", expansion: "vesaire" }
+- { abbr: "vd.", expansion: "ve diğerleri" }
+- { abbr: "bkz.", expansion: "bakınız" }
+- { abbr: "bk.", expansion: "bakınız" }
+- { abbr: "krş.", expansion: "karşılaştırınız" }
+- { abbr: "çev.", expansion: "çeviren" }
+- { abbr: "haz.", expansion: "hazırlayan" }
+- { abbr: "der.", expansion: "derleyen" }
+- { abbr: "ed.", expansion: "editör" }
+- { abbr: "yay.", expansion: "yayınları" }
+- { abbr: "bs.", expansion: "baskı" }
+- { abbr: "c.", expansion: "cilt", context: "before_number" }
+- { abbr: "s.", expansion: "sayfa", context: "before_number" }
+- { abbr: "sy.", expansion: "sayı", context: "before_number" }
+- { abbr: "bl.", expansion: "bölüm", context: "before_number" }
+- { abbr: "md.", expansion: "madde", context: "before_number" }
+- { abbr: "f.", expansion: "fıkra", context: "before_number" }
+- { abbr: "no.", expansion: "numara", context: "before_number" }
+- { abbr: "No.", expansion: "numara", case_sensitive: true }
+- { abbr: "tel.", expansion: "telefon" }
+- { abbr: "faks.", expansion: "faks" }
+- { abbr: "ör.", expansion: "örneğin" }
+- { abbr: "örn.", expansion: "örneğin" }
+- { abbr: "yak.", expansion: "yaklaşık" }
+- { abbr: "ort.", expansion: "ortalama" }
+- { abbr: "maks.", expansion: "maksimum" }
+- { abbr: "min.", expansion: "minimum" }
+- { abbr: "std.", expansion: "standart" }
+- { abbr: "y.", expansion: "yıl", context: "after_number" }
+- { abbr: "yy.", expansion: "yüzyıl" }
+- { abbr: "M.Ö.", expansion: "milattan önce", case_sensitive: true }
+- { abbr: "MÖ", expansion: "milattan önce", case_sensitive: true }
+- { abbr: "M.S.", expansion: "milattan sonra", case_sensitive: true }
+- { abbr: "MS", expansion: "milattan sonra", case_sensitive: true }
+- { abbr: "İ.Ö.", expansion: "İsa'dan önce", case_sensitive: true }
+- { abbr: "İ.S.", expansion: "İsa'dan sonra", case_sensitive: true }
+
+# --- Adres, Coğrafya ve Yön ---
+- { abbr: "Mah.", expansion: "Mahallesi", case_sensitive: true }
+- { abbr: "Cad.", expansion: "Caddesi", case_sensitive: true }
+- { abbr: "Cd.", expansion: "Caddesi", case_sensitive: true }
+- { abbr: "Sok.", expansion: "Sokağı", case_sensitive: true }
+- { abbr: "Sk.", expansion: "Sokağı", case_sensitive: true }
+- { abbr: "Bul.", expansion: "Bulvarı", case_sensitive: true }
+- { abbr: "Blv.", expansion: "Bulvarı", case_sensitive: true }
+- { abbr: "Apt.", expansion: "Apartmanı", case_sensitive: true }
+- { abbr: "Sit.", expansion: "Sitesi", case_sensitive: true }
+- { abbr: "Kat.", expansion: "Kat", case_sensitive: true }
+- { abbr: "İst.", expansion: "İstanbul", case_sensitive: true }
+- { abbr: "Ank.", expansion: "Ankara", case_sensitive: true }
+- { abbr: "İzm.", expansion: "İzmir", case_sensitive: true }
+
+# --- Ölçü Birimleri (Sayıdan Sonra) ---
+- { abbr: "km", expansion: "kilometre", context: "after_number" }
+- { abbr: "cm", expansion: "santimetre", context: "after_number" }
+- { abbr: "mm", expansion: "milimetre", context: "after_number" }
+- { abbr: "m", expansion: "metre", context: "after_number" }
+- { abbr: "kg", expansion: "kilogram", context: "after_number" }
+- { abbr: "gr", expansion: "gram", context: "after_number" }
+- { abbr: "mg", expansion: "miligram", context: "after_number" }
+- { abbr: "lt", expansion: "litre", context: "after_number" }
+- { abbr: "ml", expansion: "mililitre", context: "after_number" }
+- { abbr: "sn.", expansion: "saniye", context: "after_number" }
+- { abbr: "sn", expansion: "saniye", context: "after_number" }
+- { abbr: "dk.", expansion: "dakika", context: "after_number" }
+- { abbr: "dk", expansion: "dakika", context: "after_number" }
+- { abbr: "sa.", expansion: "saat", context: "after_number" }
+- { abbr: "GHz", expansion: "gigahertz", context: "after_number", case_sensitive: true }
+- { abbr: "MHz", expansion: "megahertz", context: "after_number", case_sensitive: true }
+- { abbr: "kHz", expansion: "kilohertz", context: "after_number", case_sensitive: true }
+- { abbr: "GB", expansion: "gigabayt", context: "after_number", case_sensitive: true }
+- { abbr: "MB", expansion: "megabayt", context: "after_number", case_sensitive: true }
+- { abbr: "KB", expansion: "kilobayt", context: "after_number", case_sensitive: true }
+- { abbr: "kWh", expansion: "kilovatsaat", context: "after_number", case_sensitive: true }
+
+# --- Ticari ve Hukuki ---
+- { abbr: "A.Ş.", expansion: "Anonim Şirketi", case_sensitive: true }
+- { abbr: "Ltd.", expansion: "Limited", case_sensitive: true }
+- { abbr: "Şti.", expansion: "Şirketi", case_sensitive: true }
+- { abbr: "San.", expansion: "Sanayi", case_sensitive: true }
+- { abbr: "Tic.", expansion: "Ticaret", case_sensitive: true }
+- { abbr: "Koop.", expansion: "Kooperatifi", case_sensitive: true }
+- { abbr: "İth.", expansion: "İthalat", case_sensitive: true }
+- { abbr: "İhr.", expansion: "İhracat", case_sensitive: true }
+
+# --- Kurumlar, Devletler ve Kısaltmalar ---
+- { abbr: "T.C.", expansion: "Türkiye Cumhuriyeti", case_sensitive: true }
+- { abbr: "TC", expansion: "Türkiye Cumhuriyeti", case_sensitive: true }
+- { abbr: "TBMM", expansion: "te be me me", case_sensitive: true }
+- { abbr: "ABD", expansion: "a be de", case_sensitive: true }
+- { abbr: "AB", expansion: "Avrupa Birliği", case_sensitive: true }
+- { abbr: "BM", expansion: "Birleşmiş Milletler", case_sensitive: true }
+- { abbr: "SSCB", expansion: "se se ce be", case_sensitive: true }
+- { abbr: "KKTC", expansion: "ka ka te ce", case_sensitive: true }
+- { abbr: "THY", expansion: "te ha ye", case_sensitive: true }
+- { abbr: "TRT", expansion: "te re te", case_sensitive: true }
+- { abbr: "PTT", expansion: "pe te te", case_sensitive: true }
+- { abbr: "DSİ", expansion: "de se i", case_sensitive: true }
+- { abbr: "SGK", expansion: "se ge ka", case_sensitive: true }
+- { abbr: "ÖSYM", expansion: "ö se ye me", case_sensitive: true }
+- { abbr: "YÖK", expansion: "yök", case_sensitive: true, read_as_word: true }
+- { abbr: "MEB", expansion: "meb", case_sensitive: true, read_as_word: true }
+- { abbr: "TSK", expansion: "te se ka", case_sensitive: true }
+- { abbr: "emniyet", expansion: "emniyet" }
+- { abbr: "MİT", expansion: "mit", case_sensitive: true, read_as_word: true }
+- { abbr: "TÜBİTAK", expansion: "tübitak", case_sensitive: true, read_as_word: true }
+- { abbr: "ASELSAN", expansion: "aselsan", case_sensitive: true, read_as_word: true }
+- { abbr: "ROKETSAN", expansion: "roketsan", case_sensitive: true, read_as_word: true }
+- { abbr: "HAVELSAN", expansion: "havelsan", case_sensitive: true, read_as_word: true }
+- { abbr: "TUSAŞ", expansion: "tusaş", case_sensitive: true, read_as_word: true }
+- { abbr: "NATO", expansion: "nato", case_sensitive: true, read_as_word: true }
+- { abbr: "UNESCO", expansion: "unesko", case_sensitive: true, read_as_word: true }
+- { abbr: "UNICEF", expansion: "unisef", case_sensitive: true, read_as_word: true }
+- { abbr: "FIFA", expansion: "fifa", case_sensitive: true, read_as_word: true }
+- { abbr: "UEFA", expansion: "uefa", case_sensitive: true, read_as_word: true }
+- { abbr: "NASA", expansion: "nasa", case_sensitive: true, read_as_word: true }
+- { abbr: " TÜİK", expansion: "tüik", case_sensitive: true, read_as_word: true }
+- { abbr: "TÜİK", expansion: "tüik", case_sensitive: true, read_as_word: true }
+- { abbr: "BDDK", expansion: "be de de ka", case_sensitive: true }
+- { abbr: "SPK", expansion: "se pe ka", case_sensitive: true }
+- { abbr: "TCMB", expansion: "te ce me be", case_sensitive: true }
+- { abbr: "KDV", expansion: "ka de ve", case_sensitive: true }
+- { abbr: "ÖTV", expansion: "ö te ve", case_sensitive: true }
+- { abbr: "GSYİH", expansion: "gayri safi yurt içi hasıla", case_sensitive: true }
+
+# --- Dil Adları ---
+- { abbr: "Ar.", expansion: "Arapça", case_sensitive: true }
+- { abbr: "Far.", expansion: "Farsça", case_sensitive: true }
+- { abbr: "Fr.", expansion: "Fransızca", case_sensitive: true }
+- { abbr: "İng.", expansion: "İngilizce", case_sensitive: true }
+- { abbr: "Alm.", expansion: "Almanca", case_sensitive: true }
+- { abbr: "Lat.", expansion: "Latince", case_sensitive: true }
+- { abbr: "Yun.", expansion: "Yunanca", case_sensitive: true }
+- { abbr: "Osm.", expansion: "Osmanlıca", case_sensitive: true }
+- { abbr: "Tr.", expansion: "Türkçe", case_sensitive: true }

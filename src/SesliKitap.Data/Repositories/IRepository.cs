@@ -89,4 +89,11 @@ public interface IRepository<T> where T : class
     /// <param name="ct">İptal belirteci.</param>
     /// <returns>Etkilenen satır sayısı.</returns>
     Task<int> SaveChangesAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Verilen işlemi veritabanı yürütme stratejisi ve transaction içinde çalıştırır.
+    /// </summary>
+    /// <param name="action">Çalıştırılacak asenkron işlem.</param>
+    /// <param name="ct">İptal belirteci.</param>
+    Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken ct = default);
 }

@@ -183,4 +183,71 @@ public sealed class ChapterRepository : GenericRepository<BookChapter>, IChapter
             await Context.SaveChangesAsync(ct);
         }
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<BookChapter>> GetForSynthesisAsync(
+        Guid bookId,
+        IReadOnlyList<Guid>? chapterIds,
+        bool onlyMissing,
+        CancellationToken ct = default)
+    {
+        var query = DbSet.Where(c => c.BookId == bookId);
+
+        if (chapterIds is { Count: > 0 })
+        {
+            query = query.Where(c => chapterIds.Contains(c.Id));
+        }
+        else
+        {
+            query = query.Where(c => c.DahilMi);
+        }
+
+        if (onlyMissing)
+        {
+            query = query.Where(c =>
+                c.SesDurumu != Data.Enums.BolumSesDurumu.Hazir ||
+                c.SesMetinSurumu != c.MetinSurumu);
+        }
+
+        return await query
+            .OrderBy(c => c.SiraNo)
+            .ToListAsync(ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<double> RecalculateBookAudioDurationAsync(Guid bookId, CancellationToken ct = default)
+    {
+        var totalDuration = await DbSet
+            .AsNoTracking()
+            .Where(c => c.BookId == bookId &&
+                        c.DahilMi &&
+                        (c.SesDurumu == Data.Enums.BolumSesDurumu.Hazir ||
+                         c.SesDurumu == Data.Enums.BolumSesDurumu.GuncelDegil) &&
+                        c.SureSn != null)
+            .SumAsync(c => c.SureSn ?? 0d, ct);
+
+        totalDuration = Math.Round(totalDuration, 2);
+        var now = DateTime.UtcNow;
+
+        if (Context.Database.IsRelational())
+        {
+            await Context.Set<Book>()
+                .Where(b => b.Id == bookId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(b => b.ToplamSureSn, totalDuration)
+                    .SetProperty(b => b.GuncellemeTarihi, now), ct);
+        }
+        else
+        {
+            var book = await Context.Set<Book>().FirstOrDefaultAsync(b => b.Id == bookId, ct);
+            if (book is not null)
+            {
+                book.ToplamSureSn = totalDuration;
+                book.GuncellemeTarihi = now;
+                await Context.SaveChangesAsync(ct);
+            }
+        }
+
+        return totalDuration;
+    }
 }

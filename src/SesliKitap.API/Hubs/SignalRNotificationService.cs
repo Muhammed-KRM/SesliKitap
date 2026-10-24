@@ -133,6 +133,94 @@ public sealed partial class SignalRNotificationService : INotificationService
         }
     }
 
+    /// <inheritdoc />
+    public async Task SynthesisProgressAsync(
+        Guid jobId,
+        Guid bookId,
+        Guid? chapterId,
+        int yuzde,
+        int bolumYuzde,
+        int tamamlananBolum,
+        int toplamBolum,
+        string mesaj,
+        long gpuMs,
+        double? tahminiKalanSn,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var payload = new SynthesisProgressMessage(
+                jobId,
+                bookId,
+                chapterId,
+                yuzde,
+                bolumYuzde,
+                tamamlananBolum,
+                toplamBolum,
+                mesaj,
+                gpuMs,
+                tahminiKalanSn);
+            await _hubContext.Clients
+                .Group(HubGroups.Book(bookId))
+                .SynthesisProgress(payload);
+        }
+        catch (Exception ex)
+        {
+            LogNotificationWarning(_logger, nameof(SynthesisProgressAsync), ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task ChapterReadyAsync(
+        Guid jobId,
+        Guid bookId,
+        Guid chapterId,
+        double sureSn,
+        string motor,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var payload = new ChapterReadyMessage(jobId, bookId, chapterId, sureSn, motor);
+            await _hubContext.Clients
+                .Group(HubGroups.Book(bookId))
+                .ChapterReady(payload);
+        }
+        catch (Exception ex)
+        {
+            LogNotificationWarning(_logger, nameof(ChapterReadyAsync), ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task SynthesisCompletedAsync(
+        Guid jobId,
+        Guid bookId,
+        string sonuc,
+        int tamamlananBolum,
+        int hataliBolum,
+        decimal maliyetUsd,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var payload = new SynthesisCompletedMessage(
+                jobId,
+                bookId,
+                sonuc,
+                tamamlananBolum,
+                hataliBolum,
+                maliyetUsd);
+            await _hubContext.Clients
+                .Groups(HubGroups.Book(bookId), HubGroups.Library)
+                .SynthesisCompleted(payload);
+        }
+        catch (Exception ex)
+        {
+            LogNotificationWarning(_logger, nameof(SynthesisCompletedAsync), ex);
+        }
+    }
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "SignalR bildirimi gönderilemedi ({MethodName}); iş akışı devam ediyor.")]
     private static partial void LogNotificationWarning(ILogger logger, string methodName, Exception ex);
 }

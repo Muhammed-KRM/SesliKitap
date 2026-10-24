@@ -173,23 +173,47 @@ public sealed class MinioFileStorageService : IFileStorageService
                 .WithObject(key)
                 .WithCallbackStream(async (stream, token) =>
                 {
-                    await stream.CopyToAsync(destination, 81920, token);
-                });
+                    if (offset <= 0 && !length.HasValue)
+                    {
+                        await stream.CopyToAsync(destination, 81920, token);
+                        return;
+                    }
 
-            if (offset > 0 || length.HasValue)
-            {
-                if (length.HasValue)
-                {
-                    getArgs.WithOffsetAndLength(offset, length.Value);
-                }
-                else
-                {
-                    var info = await GetInfoAsync(key, ct)
-                        ?? throw new NotFoundException("MinIO Nesnesi", key);
-                    var remaining = Math.Max(0, info.Size - offset);
-                    getArgs.WithOffsetAndLength(offset, remaining);
-                }
-            }
+                    var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(81920);
+                    try
+                    {
+                        var remainingSkip = offset;
+                        while (remainingSkip > 0)
+                        {
+                            var toRead = (int)Math.Min(buffer.Length, remainingSkip);
+                            var read = await stream.ReadAsync(buffer.AsMemory(0, toRead), token);
+                            if (read <= 0)
+                            {
+                                return;
+                            }
+
+                            remainingSkip -= read;
+                        }
+
+                        var remainingCopy = length ?? long.MaxValue;
+                        while (remainingCopy > 0)
+                        {
+                            var toRead = (int)Math.Min(buffer.Length, remainingCopy);
+                            var read = await stream.ReadAsync(buffer.AsMemory(0, toRead), token);
+                            if (read <= 0)
+                            {
+                                break;
+                            }
+
+                            await destination.WriteAsync(buffer.AsMemory(0, read), token);
+                            remainingCopy -= read;
+                        }
+                    }
+                    finally
+                    {
+                        System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                    }
+                });
 
             await _minioClient.GetObjectAsync(getArgs, ct);
         }
@@ -204,7 +228,7 @@ public sealed class MinioFileStorageService : IFileStorageService
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger.LogError(ex, "MinIO akış kopyalama hatası: {Key} (Offset={Offset}, Length={Length})", key, offset, length);
-            throw new ExternalServiceException("MinIO", $"Medya akışı okunamadı: {key}", ex);
+            throw new ExternalServiceException("MinIO", $"Medya akışı okunamadı: {key} ({ex.GetType().Name}: {ex.Message})", ex);
         }
     }
 

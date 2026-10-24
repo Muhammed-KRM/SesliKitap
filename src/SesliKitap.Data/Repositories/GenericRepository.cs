@@ -97,4 +97,24 @@ public class GenericRepository<T> : IRepository<T> where T : class
     {
         return await Context.SaveChangesAsync(ct);
     }
+
+    /// <inheritdoc />
+    public virtual async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+
+        if (!Context.Database.IsRelational())
+        {
+            await action(ct);
+            return;
+        }
+
+        var strategy = Context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async token =>
+        {
+            await using var tx = await Context.Database.BeginTransactionAsync(token);
+            await action(token);
+            await tx.CommitAsync(token);
+        }, ct);
+    }
 }

@@ -92,11 +92,4 @@ public interface IBookRepository : IRepository<Book>
     /// <param name="id">Kitap kimliği.</param>
     /// <param name="ct">İptal belirteci.</param>
     Task HardDeleteAsync(Guid id, CancellationToken ct = default);
-
-    /// <summary>
-    /// Verilen işlemi veritabanı yürütme stratejisi ve transaction içinde çalıştırır.
-    /// </summary>
-    /// <param name="action">Çalıştırılacak asenkron işlem.</param>
-    /// <param name="ct">İptal belirteci.</param>
-    Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken ct = default);
 }

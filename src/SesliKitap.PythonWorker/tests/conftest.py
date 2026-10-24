@@ -10,9 +10,11 @@ from pydantic import BaseModel
 from config import settings
 from models.events import (
     BookProcessedEvent,
+    ChapterSynthesizedEvent,
     IntegrationEventBase,
     PipelineErrorEvent,
     PipelineStageChangedEvent,
+    SynthesisCompletedEvent,
 )
 
 T = TypeVar("T", bound=BaseModel)
@@ -70,6 +72,8 @@ class FakeRabbitMQPublisher:
         self.stage_events: list[PipelineStageChangedEvent] = []
         self.processed_events: list[BookProcessedEvent] = []
         self.error_events: list[PipelineErrorEvent] = []
+        self.chapter_synthesized_events: list[ChapterSynthesizedEvent] = []
+        self.synthesis_completed_events: list[SynthesisCompletedEvent] = []
         self.raw_events: list[tuple[str, Any]] = []
 
     def publish_raw(self, exchange_short_name: str, payload: dict[str, Any] | IntegrationEventBase) -> None:
@@ -77,6 +81,12 @@ class FakeRabbitMQPublisher:
 
     def publish_book_processed(self, event: BookProcessedEvent) -> None:
         self.processed_events.append(event)
+
+    def publish_chapter_synthesized(self, event: ChapterSynthesizedEvent) -> None:
+        self.chapter_synthesized_events.append(event)
+
+    def publish_synthesis_completed(self, event: SynthesisCompletedEvent) -> None:
+        self.synthesis_completed_events.append(event)
 
     def publish_stage_changed(
         self,
@@ -155,6 +165,30 @@ def fake_minio() -> FakeMinioClient:
 @pytest.fixture
 def fake_publisher() -> FakeRabbitMQPublisher:
     return FakeRabbitMQPublisher()
+
+
+class FakeRedis:
+    """Bellek içi sözlük tabanlı sahte Redis istemcisi."""
+
+    def __init__(self) -> None:
+        self.store: dict[str, str] = {}
+
+    def get(self, key: str) -> str | None:
+        return self.store.get(key)
+
+    def set(self, key: str, value: str) -> None:
+        self.store[key] = str(value)
+
+    def setex(self, key: str, ttl: int, value: str) -> None:
+        self.store[key] = str(value)
+
+    def mget(self, keys: list[str]) -> list[str | None]:
+        return [self.store.get(k) for k in keys]
+
+
+@pytest.fixture
+def fake_redis() -> FakeRedis:
+    return FakeRedis()
 
 
 @pytest.fixture

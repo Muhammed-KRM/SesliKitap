@@ -12,15 +12,20 @@ namespace SesliKitap.API.Consumers;
 public sealed class PipelineErrorConsumer : IConsumer<PipelineErrorEvent>
 {
     private readonly BookProcessingResultHandler _handler;
+    private readonly ISynthesisService? _synthesisService;
     private readonly ILogService _logService;
 
     /// <summary>
     /// <see cref="PipelineErrorConsumer"/> sınıfının yeni bir örneğini başlatır.
     /// </summary>
-    public PipelineErrorConsumer(BookProcessingResultHandler handler, ILogService logService)
+    public PipelineErrorConsumer(
+        BookProcessingResultHandler handler,
+        ILogService logService,
+        ISynthesisService? synthesisService = null)
     {
         _handler = handler;
         _logService = logService;
+        _synthesisService = synthesisService;
     }
 
     /// <inheritdoc />
@@ -31,7 +36,14 @@ public sealed class PipelineErrorConsumer : IConsumer<PipelineErrorEvent>
         var e = context.Message;
         try
         {
-            await _handler.HandleErrorAsync(e, context.CancellationToken);
+            if (e.JobId.HasValue && _synthesisService is not null)
+            {
+                await _synthesisService.HandleErrorAsync(e, context.CancellationToken);
+            }
+            else
+            {
+                await _handler.HandleErrorAsync(e, context.CancellationToken);
+            }
         }
         catch (Exception ex)
         {

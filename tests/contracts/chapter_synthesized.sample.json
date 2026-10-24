@@ -1,0 +1,20 @@
+{
+  "eventId": "01930000-0000-7000-8000-000000000010",
+  "occurredAtUtc": "2026-10-24T12:00:00Z",
+  "traceId": "trace-contract-001",
+  "jobId": "01930000-0000-7000-8000-000000000001",
+  "bookId": "01930000-0000-7000-8000-000000000002",
+  "chapterId": "01930000-0000-7000-8000-000000000004",
+  "metinSurumu": 1,
+  "opusYolu": "books/01930000-0000-7000-8000-000000000002/audio/01930000-0000-7000-8000-000000000004/v1/audio.ogg",
+  "mp3Yolu": "books/01930000-0000-7000-8000-000000000002/audio/01930000-0000-7000-8000-000000000004/v1/audio.mp3",
+  "zamanDamgasiYolu": "books/01930000-0000-7000-8000-000000000002/audio/01930000-0000-7000-8000-000000000004/v1/timestamps.json",
+  "opusBoyutu": 124500,
+  "mp3Boyutu": 168900,
+  "sureSn": 62.4,
+  "cumleSayisi": 14,
+  "motor": "voxcpm2_modal",
+  "gpuMs": 14200,
+  "onbellekParca": 3,
+  "uretilenParca": 11
+}

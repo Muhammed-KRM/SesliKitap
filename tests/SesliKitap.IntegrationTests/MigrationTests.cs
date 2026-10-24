@@ -30,8 +30,10 @@ public sealed class MigrationTests
 
         var appliedMigrations = (await db.Database.GetAppliedMigrationsAsync()).ToList();
 
-        appliedMigrations.Should().HaveCountGreaterThanOrEqualTo(2);
+        appliedMigrations.Should().HaveCountGreaterThanOrEqualTo(4);
         appliedMigrations.Should().Contain(m => m.EndsWith("InitialCreate", StringComparison.Ordinal));
         appliedMigrations.Should().Contain(m => m.EndsWith("AddBooksAndChapters", StringComparison.Ordinal));
+        appliedMigrations.Should().Contain(m => m.EndsWith("AddVoiceProfiles", StringComparison.Ordinal));
+        appliedMigrations.Should().Contain(m => m.EndsWith("AddSynthesisJobs", StringComparison.Ordinal));
     }
 }

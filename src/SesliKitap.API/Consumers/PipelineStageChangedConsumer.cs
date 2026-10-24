@@ -12,15 +12,20 @@ namespace SesliKitap.API.Consumers;
 public sealed class PipelineStageChangedConsumer : IConsumer<PipelineStageChangedEvent>
 {
     private readonly BookProcessingResultHandler _handler;
+    private readonly ISynthesisService? _synthesisService;
     private readonly ILogService _logService;
 
     /// <summary>
     /// <see cref="PipelineStageChangedConsumer"/> sınıfının yeni bir örneğini başlatır.
     /// </summary>
-    public PipelineStageChangedConsumer(BookProcessingResultHandler handler, ILogService logService)
+    public PipelineStageChangedConsumer(
+        BookProcessingResultHandler handler,
+        ILogService logService,
+        ISynthesisService? synthesisService = null)
     {
         _handler = handler;
         _logService = logService;
+        _synthesisService = synthesisService;
     }
 
     /// <inheritdoc />
@@ -31,7 +36,14 @@ public sealed class PipelineStageChangedConsumer : IConsumer<PipelineStageChange
         var e = context.Message;
         try
         {
-            await _handler.HandleStageChangedAsync(e, context.CancellationToken);
+            if (e.JobId.HasValue && _synthesisService is not null)
+            {
+                await _synthesisService.HandleStageChangedAsync(e, context.CancellationToken);
+            }
+            else
+            {
+                await _handler.HandleStageChangedAsync(e, context.CancellationToken);
+            }
         }
         catch (Exception ex)
         {

@@ -99,6 +99,17 @@ class StoragePaths:
     def chapter_timestamps(book_id: str, chapter_id: str, version: int) -> str:
         return f"books/{book_id}/audio/{chapter_id}/v{version}/timestamps.json"
 
+    @staticmethod
+    def tts_chunk_object(chunk_hash: str) -> str:
+        prefix = chunk_hash[:2] if len(chunk_hash) >= 2 else "00"
+        return f"tts-cache/{prefix}/{chunk_hash}.flac"
+
 
 QUALITY_MS_PER_CHAR_MIN = 25
 QUALITY_MS_PER_CHAR_MAX = 160
+QUALITY_SILENCE_RMS_DBFS = -50.0
+QUALITY_SPEECH_FRAME_DBFS = -40.0
+QUALITY_MIN_SPEECH_FRAME_RATIO = 0.25
+QUALITY_CLIPPING_THRESHOLD = 0.999
+QUALITY_MAX_CLIPPING_RATIO = 0.001
+QUALITY_MAX_INTERNAL_SILENCE_SEC = 2.5

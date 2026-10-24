@@ -1,5 +1,6 @@
 using System.Text.Json;
 using SesliKitap.Business.DTOs.Chapter;
+using SesliKitap.Business.DTOs.Synthesis;
 using SesliKitap.Data.Enums;
 
 namespace SesliKitap.Business.DTOs.Book;
@@ -27,6 +28,7 @@ namespace SesliKitap.Business.DTOs.Book;
 /// <param name="Istatistik">Metin çıkarma ve temizlik istatistikleri JSON nesnesi.</param>
 /// <param name="OlusturmaTarihi">Oluşturulma tarihi (UTC).</param>
 /// <param name="SonDinlenmeTarihi">Son dinlenme tarihi (UTC).</param>
+/// <param name="AktifIs">Kitap için devam eden aktif seslendirme işi (varsa).</param>
 public sealed record BookDetailDto(
     Guid Id,
     string Baslik,
@@ -47,4 +49,5 @@ public sealed record BookDetailDto(
     IReadOnlyList<ChapterSummaryDto> Bolumler,
     JsonElement? Istatistik,
     DateTime OlusturmaTarihi,
-    DateTime? SonDinlenmeTarihi);
+    DateTime? SonDinlenmeTarihi,
+    SynthesisJobDto? AktifIs = null);

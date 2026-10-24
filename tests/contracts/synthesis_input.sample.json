@@ -1,0 +1,53 @@
+{
+  "jobId": "01930000-0000-7000-8000-000000000001",
+  "book": {
+    "id": "01930000-0000-7000-8000-000000000002",
+    "baslik": "Kürk Mantolu Madonna",
+    "yazar": "Sabahattin Ali",
+    "kapakYolu": "books/01930000-0000-7000-8000-000000000002/cover.jpg"
+  },
+  "voiceProfile": {
+    "id": "01930000-0000-7000-8000-000000000003",
+    "ad": "Anlatıcı Sesi",
+    "referansSesYolu": "voices/01930000-0000-7000-8000-000000000003/reference.wav",
+    "referansHash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "referansMetin": "Merhaba dünya, bu bir ses profili referans metnidir.",
+    "parametreler": {
+      "cfgValue": 2.0,
+      "inferenceTimesteps": 10,
+      "konusmaHizi": 1.0,
+      "tohum": 42
+    }
+  },
+  "motorSirasi": [
+    "voxcpm2_modal",
+    "xtts2_modal"
+  ],
+  "ayarlar": {
+    "cumleArasiMs": 420,
+    "paragrafArasiMs": 950,
+    "baslikSonrasiMs": 1400,
+    "diyalogMs": 320,
+    "bolumBasligiOku": true,
+    "opusBitrateKbps": 48,
+    "mp3BitrateKbps": 64,
+    "hedefLufs": -18.0
+  },
+  "telaffuzSozlugu": [
+    {
+      "kelime": "Madonna",
+      "okunus": "Madonna",
+      "buyukKucukDuyarli": false
+    }
+  ],
+  "chapters": [
+    {
+      "id": "01930000-0000-7000-8000-000000000004",
+      "siraNo": 1,
+      "baslik": "Birinci Bölüm",
+      "metinSurumu": 1,
+      "temizMetin": "Raif Efendi sessiz bir adamdı.\n\nBerlin yıllarını kimseye anlatmazdı.",
+      "sesSurumu": null
+    }
+  ]
+}

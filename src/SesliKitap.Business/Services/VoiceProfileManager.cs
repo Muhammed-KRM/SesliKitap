@@ -19,6 +19,7 @@ namespace SesliKitap.Business.Services;
 public sealed class VoiceProfileManager : IVoiceProfileService
 {
     private readonly IVoiceProfileRepository _voiceRepository;
+    private readonly ISynthesisJobRepository? _jobRepository;
     private readonly IFileStorageService _storage;
     private readonly ICacheService _cache;
     private readonly IEventPublisher _publisher;
@@ -42,9 +43,11 @@ public sealed class VoiceProfileManager : IVoiceProfileService
         IValidator<VoiceProfileCreateRequest> createValidator,
         IValidator<VoiceProfileUpdateRequest> updateValidator,
         IOptions<SynthesisDefaultsOptions> synthesisDefaults,
-        IOptions<CacheOptions> cacheOptions)
+        IOptions<CacheOptions> cacheOptions,
+        ISynthesisJobRepository? jobRepository = null)
     {
         _voiceRepository = voiceRepository;
+        _jobRepository = jobRepository;
         _storage = storage;
         _cache = cache;
         _publisher = publisher;
@@ -277,6 +280,11 @@ public sealed class VoiceProfileManager : IVoiceProfileService
     {
         var entity = await _voiceRepository.GetByIdAsync(id, ct)
                      ?? throw new NotFoundException("Ses profili", id);
+
+        if (_jobRepository is not null && await _jobRepository.AnyActiveJobForVoiceProfileAsync(id, ct))
+        {
+            throw new ConflictException("Bu ses profili devam eden bir seslendirme işinde kullanıldığı için silinemez.", id);
+        }
 
         entity.VarsayilanMi = false;
         _voiceRepository.Delete(entity);

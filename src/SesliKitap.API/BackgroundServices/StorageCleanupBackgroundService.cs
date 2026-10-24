@@ -37,6 +37,7 @@ public sealed partial class StorageCleanupBackgroundService : BackgroundService
         using var scope = _scopeFactory.CreateScope();
         var bookRepository = scope.ServiceProvider.GetRequiredService<IBookRepository>();
         var voiceRepository = scope.ServiceProvider.GetService<IVoiceProfileRepository>();
+        var jobRepository = scope.ServiceProvider.GetService<ISynthesisJobRepository>();
         var storage = scope.ServiceProvider.GetRequiredService<IFileStorageService>();
         var logService = scope.ServiceProvider.GetRequiredService<ILogService>();
 
@@ -81,6 +82,23 @@ public sealed partial class StorageCleanupBackgroundService : BackgroundService
                         new { VoiceProfileId = voice.Id },
                         ct: ct);
                     LogCleanupError(_logger, voice.Id, ex);
+                }
+            }
+        }
+
+        if (jobRepository is not null)
+        {
+            var inputCutoff = _clock.UtcNow.UtcDateTime - TimeSpan.FromDays(7);
+            var oldJobIds = await jobRepository.GetCompletedJobIdsBeforeAsync(inputCutoff, ct);
+            foreach (var jobId in oldJobIds)
+            {
+                try
+                {
+                    await storage.DeleteAsync(StorageKeys.SynthesisInput(jobId), ct);
+                }
+                catch (Exception ex)
+                {
+                    LogCleanupError(_logger, jobId, ex);
                 }
             }
         }

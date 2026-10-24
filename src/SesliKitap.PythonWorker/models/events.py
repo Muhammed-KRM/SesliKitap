@@ -179,3 +179,45 @@ class VoiceProfileReadyEvent(IntegrationEventBase):
     ornek_ses_yolu: str | None = None
     gpu_ms: int = 0
     hata_mesaji: str | None = None
+
+
+class SynthesisRequestedEvent(IntegrationEventBase):
+    """.NET API tarafından yayınlanan kitap seslendirme (sentez) işi başlatma olayı."""
+
+    job_id: str
+    book_id: str
+    girdi_yolu: str
+
+
+class ChapterSynthesizedEvent(IntegrationEventBase):
+    """Tek bir bölümün seslendirmesi tamamlandığında yayınlanan olay."""
+
+    job_id: str
+    book_id: str
+    chapter_id: str
+    metin_surumu: int
+    opus_yolu: str
+    mp3_yolu: str
+    zaman_damgasi_yolu: str
+    opus_boyutu: int
+    mp3_boyutu: int
+    sure_sn: float
+    cumle_sayisi: int
+    motor: str
+    gpu_ms: int = 0
+    onbellek_parca: int = 0
+    uretilen_parca: int = 0
+
+
+class SynthesisCompletedEvent(IntegrationEventBase):
+    """Sentez işinin tüm bölümleri tamamlandığında (veya iptal edildiğinde) yayınlanan olay."""
+
+    job_id: str
+    book_id: str
+    sonuc: str = "Tamamlandi"
+    tamamlanan_bolum: int = 0
+    hatali_bolum: int = 0
+    iptal_edildi: bool = False
+    toplam_gpu_ms: int = 0
+    uretilen_ses_sn: float = 0.0
+    kullanilan_motorlar: str | None = None
