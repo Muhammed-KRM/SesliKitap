@@ -24,4 +24,9 @@ public interface IAudiobookClient
     /// Pipeline hata olayı.
     /// </summary>
     Task PipelineError(PipelineErrorMessage message);
+
+    /// <summary>
+    /// Ses profili hazırlama tamamlanma olayı.
+    /// </summary>
+    Task VoiceProfileReady(VoiceProfileReadyMessage message);
 }

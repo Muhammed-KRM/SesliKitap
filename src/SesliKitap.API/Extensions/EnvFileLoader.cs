@@ -105,6 +105,17 @@ public static class EnvFileLoader
             }
         }
 
+        var engineOrderRaw = Environment.GetEnvironmentVariable("TTS_ENGINE_ORDER")
+                             ?? configuration["TTS_ENGINE_ORDER"];
+        if (!string.IsNullOrWhiteSpace(engineOrderRaw))
+        {
+            var engines = engineOrderRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            for (var i = 0; i < engines.Length; i++)
+            {
+                configuration[$"Tts:EngineOrder:{i}"] = engines[i];
+            }
+        }
+
         if (string.IsNullOrWhiteSpace(configuration.GetConnectionString("DefaultConnection")))
         {
             var host = Environment.GetEnvironmentVariable("DB_HOST") ?? configuration["DB_HOST"];

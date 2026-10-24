@@ -113,6 +113,26 @@ public sealed partial class SignalRNotificationService : INotificationService
         }
     }
 
+    /// <inheritdoc />
+    public async Task VoiceProfileReadyAsync(
+        Guid voiceProfileId,
+        bool basarili,
+        string? hataMesaji,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var payload = new VoiceProfileReadyMessage(voiceProfileId, basarili, hataMesaji);
+            await _hubContext.Clients
+                .Group(HubGroups.Voices)
+                .VoiceProfileReady(payload);
+        }
+        catch (Exception ex)
+        {
+            LogNotificationWarning(_logger, nameof(VoiceProfileReadyAsync), ex);
+        }
+    }
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "SignalR bildirimi gönderilemedi ({MethodName}); iş akışı devam ediyor.")]
     private static partial void LogNotificationWarning(ILogger logger, string methodName, Exception ex);
 }

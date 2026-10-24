@@ -12,6 +12,7 @@ from models.events import (
     IntegrationEventBase,
     PipelineErrorEvent,
     PipelineStageChangedEvent,
+    VoiceProfileReadyEvent,
 )
 from utils.constants import Exchanges
 from utils.logger import get_current_trace_id, get_logger
@@ -93,6 +94,10 @@ class RabbitMQPublisher:
     def publish_book_processed(self, event: BookProcessedEvent) -> None:
         """BookProcessedEvent yayınlar."""
         self.publish_raw(Exchanges.BOOK_PROCESSED, event)
+
+    def publish_voice_profile_ready(self, event: VoiceProfileReadyEvent) -> None:
+        """VoiceProfileReadyEvent yayınlar."""
+        self.publish_raw(Exchanges.VOICE_PROFILE_READY, event)
 
     def publish_stage_changed(
         self,

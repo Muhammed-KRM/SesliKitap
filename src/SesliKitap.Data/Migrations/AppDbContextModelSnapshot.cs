@@ -567,6 +567,112 @@ namespace SesliKitap.Data.Migrations
                     b.ToTable("pipeline_logs", (string)null);
                 });
 
+            modelBuilder.Entity("SesliKitap.Data.Entities.VoiceProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Aciklama")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("aciklama");
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ad");
+
+                    b.Property<int?>("Cinsiyet")
+                        .HasColumnType("integer")
+                        .HasColumnName("cinsiyet");
+
+                    b.Property<int>("Durum")
+                        .HasColumnType("integer")
+                        .HasColumnName("durum");
+
+                    b.Property<long>("GpuMs")
+                        .HasColumnType("bigint")
+                        .HasColumnName("gpu_ms");
+
+                    b.Property<DateTime?>("GuncellemeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("guncelleme_tarihi");
+
+                    b.Property<string>("HamSesYolu")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("ham_ses_yolu");
+
+                    b.Property<string>("HataMesaji")
+                        .HasColumnType("text")
+                        .HasColumnName("hata_mesaji");
+
+                    b.Property<bool>("KullanimOnayi")
+                        .HasColumnType("boolean")
+                        .HasColumnName("kullanim_onayi");
+
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("olusturma_tarihi");
+
+                    b.Property<string>("OrnekSesYolu")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("ornek_ses_yolu");
+
+                    b.Property<string>("ReferansHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character(64)")
+                        .HasColumnName("referans_hash")
+                        .IsFixedLength();
+
+                    b.Property<string>("ReferansMetin")
+                        .HasColumnType("text")
+                        .HasColumnName("referans_metin");
+
+                    b.Property<string>("ReferansSesYolu")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("referans_ses_yolu");
+
+                    b.Property<double?>("ReferansSureSn")
+                        .HasColumnType("double precision")
+                        .HasColumnName("referans_sure_sn");
+
+                    b.Property<bool>("SilindiMi")
+                        .HasColumnType("boolean")
+                        .HasColumnName("silindi_mi");
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("silinme_tarihi");
+
+                    b.Property<bool>("VarsayilanMi")
+                        .HasColumnType("boolean")
+                        .HasColumnName("varsayilan_mi");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Ad")
+                        .IsUnique()
+                        .HasDatabaseName("ix_voice_profiles_ad_unique")
+                        .HasFilter("silindi_mi = false");
+
+                    b.HasIndex("Durum")
+                        .HasDatabaseName("ix_voice_profiles_durum");
+
+                    b.HasIndex("VarsayilanMi")
+                        .IsUnique()
+                        .HasDatabaseName("ix_voice_profiles_varsayilan_unique")
+                        .HasFilter("varsayilan_mi = true AND silindi_mi = false");
+
+                    b.ToTable("voice_profiles", (string)null);
+                });
+
             modelBuilder.Entity("SesliKitap.Data.Entities.BookChapter", b =>
                 {
                     b.HasOne("SesliKitap.Data.Entities.Book", "Book")
@@ -576,6 +682,36 @@ namespace SesliKitap.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Book");
+                });
+
+            modelBuilder.Entity("SesliKitap.Data.Entities.VoiceProfile", b =>
+                {
+                    b.OwnsOne("SesliKitap.Data.Entities.VoiceParameters", "Parametreler", b1 =>
+                        {
+                            b1.Property<Guid>("VoiceProfileId");
+
+                            b1.Property<double>("CfgValue");
+
+                            b1.Property<int>("InferenceTimesteps");
+
+                            b1.Property<double>("KonusmaHizi");
+
+                            b1.Property<int?>("Tohum");
+
+                            b1.HasKey("VoiceProfileId");
+
+                            b1.ToTable("voice_profiles");
+
+                            b1
+                                .ToJson("parametreler")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("VoiceProfileId");
+                        });
+
+                    b.Navigation("Parametreler")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SesliKitap.Data.Entities.Book", b =>

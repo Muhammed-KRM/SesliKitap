@@ -82,6 +82,23 @@ class StoragePaths:
     def book_extraction_report(book_id: str) -> str:
         return f"books/{book_id}/processed/extraction-report.json"
 
+    @staticmethod
+    def voice_reference(voice_profile_id: str) -> str:
+        return f"voices/{voice_profile_id}/reference.wav"
+
+    @staticmethod
+    def voice_sample(voice_profile_id: str) -> str:
+        return f"voices/{voice_profile_id}/sample.ogg"
+
+    @staticmethod
+    def chapter_audio(book_id: str, chapter_id: str, version: int, ext: str) -> str:
+        clean_ext = ext.lstrip(".").lower()
+        return f"books/{book_id}/audio/{chapter_id}/v{version}/chapter.{clean_ext}"
+
+    @staticmethod
+    def chapter_timestamps(book_id: str, chapter_id: str, version: int) -> str:
+        return f"books/{book_id}/audio/{chapter_id}/v{version}/timestamps.json"
+
 
 QUALITY_MS_PER_CHAR_MIN = 25
 QUALITY_MS_PER_CHAR_MAX = 160

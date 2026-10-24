@@ -36,6 +36,7 @@ public sealed partial class StorageCleanupBackgroundService : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
         var bookRepository = scope.ServiceProvider.GetRequiredService<IBookRepository>();
+        var voiceRepository = scope.ServiceProvider.GetService<IVoiceProfileRepository>();
         var storage = scope.ServiceProvider.GetRequiredService<IFileStorageService>();
         var logService = scope.ServiceProvider.GetRequiredService<ILogService>();
 
@@ -58,6 +59,29 @@ public sealed partial class StorageCleanupBackgroundService : BackgroundService
                     new { BookId = book.Id },
                     ct: ct);
                 LogCleanupError(_logger, book.Id, ex);
+            }
+        }
+
+        if (voiceRepository is not null)
+        {
+            var expiredVoices = await voiceRepository.GetExpiredSoftDeletedAsync(cutoff, ct);
+            foreach (var voice in expiredVoices)
+            {
+                try
+                {
+                    await storage.DeleteByPrefixAsync(StorageKeys.VoicePrefix(voice.Id), ct);
+                    await voiceRepository.HardDeleteAsync(voice, ct);
+                    LogVoiceCleaned(_logger, voice.Id, voice.Ad);
+                }
+                catch (Exception ex)
+                {
+                    await logService.LogFunctionErrorAsync(
+                        ErrorCodes.StorageAccessError,
+                        ex,
+                        new { VoiceProfileId = voice.Id },
+                        ct: ct);
+                    LogCleanupError(_logger, voice.Id, ex);
+                }
             }
         }
     }
@@ -91,6 +115,9 @@ public sealed partial class StorageCleanupBackgroundService : BackgroundService
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Silinmiş kitap dosyaları ve veritabanı kaydı kalıcı olarak temizlendi: {BookId} ({Title})")]
     private static partial void LogBookCleaned(ILogger logger, Guid bookId, string title);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Silinmiş ses profili dosyaları ve veritabanı kaydı kalıcı olarak temizlendi: {VoiceId} ({Name})")]
+    private static partial void LogVoiceCleaned(ILogger logger, Guid voiceId, string name);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Silinmiş kitap temizlenirken hata oluştu: {BookId}")]
     private static partial void LogCleanupError(ILogger logger, Guid bookId, Exception ex);

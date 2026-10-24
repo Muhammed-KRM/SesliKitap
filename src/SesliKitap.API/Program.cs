@@ -29,6 +29,7 @@ builder.Services
         bus.AddConsumer<BookProcessedConsumer>();
         bus.AddConsumer<PipelineStageChangedConsumer>();
         bus.AddConsumer<PipelineErrorConsumer>();
+        bus.AddConsumer<VoiceProfileReadyConsumer>();
     })
     .AddScoped<INotificationService, SignalRNotificationService>()
     .AddHostedService<StorageCleanupBackgroundService>();

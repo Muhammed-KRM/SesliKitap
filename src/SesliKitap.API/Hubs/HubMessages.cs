@@ -37,3 +37,11 @@ public sealed record PipelineErrorMessage(
     string Asama,
     string HataMesaji,
     bool Kurtarilabilir);
+
+/// <summary>
+/// Ses profili hazırlık tamamlanma bildirimi yükü (<c>VoiceProfileReady</c>).
+/// </summary>
+public sealed record VoiceProfileReadyMessage(
+    Guid VoiceProfileId,
+    bool Basarili,
+    string? HataMesaji);

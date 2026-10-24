@@ -57,6 +57,16 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<TtsOptions>()
+            .Bind(configuration.GetSection(TtsOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<SynthesisDefaultsOptions>()
+            .Bind(configuration.GetSection(SynthesisDefaultsOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         // 2) FluentValidation doğrulayıcıları
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -99,6 +109,7 @@ public static class DependencyInjection
         services.AddScoped<IBookService, BookManager>();
         services.AddScoped<BookProcessingResultHandler>();
         services.AddScoped<IChapterService, ChapterManager>();
+        services.AddScoped<IVoiceProfileService, VoiceProfileManager>();
 
         // 7) MassTransit + RabbitMQ (Python uyumu için Raw JSON)
         services.AddMassTransit(x =>

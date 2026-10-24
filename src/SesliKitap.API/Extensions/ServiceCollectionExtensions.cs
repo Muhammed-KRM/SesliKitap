@@ -167,11 +167,19 @@ public static class ServiceCollectionExtensions
         });
 
         // 8) Altyapı Sağlık Kontrolleri
+        services.AddHttpClient<TtsServerHealthCheck>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(5);
+        });
+
         services.AddHealthChecks()
             .AddCheck<PostgresHealthCheck>("postgres")
             .AddCheck<RedisHealthCheck>("redis")
             .AddCheck<RabbitMqHealthCheck>("rabbitmq")
-            .AddCheck<MinioHealthCheck>("minio");
+            .AddCheck<MinioHealthCheck>("minio")
+            .AddCheck<TtsServerHealthCheck>(
+                "tts",
+                failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
 
         return services;
     }

@@ -1,0 +1,10 @@
+torch>=2.5.0
+torchaudio>=2.5.0
+voxcpm>=0.1.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.10.0
+pydantic-settings>=2.6.0
+soundfile>=0.12.1
+numpy>=1.26.4,<2.1.0
+huggingface-hub>=0.26.0

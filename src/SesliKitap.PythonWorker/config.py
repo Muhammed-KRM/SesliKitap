@@ -86,7 +86,14 @@ class Config(BaseSettings):
     tts_modal_url: str | None = Field(default=None, validation_alias=AliasChoices("TTS_MODAL_URL", "tts_modal_url"))
     tts_alt_url: str | None = Field(default=None, validation_alias=AliasChoices("TTS_ALT_URL", "tts_alt_url"))
     tts_xtts_url: str | None = Field(default=None, validation_alias=AliasChoices("TTS_XTTS_URL", "tts_xtts_url"))
-    tts_api_token: SecretStr | None = Field(default=None, validation_alias=AliasChoices("TTS_API_TOKEN", "tts_api_token"))
+    tts_api_token: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("TTS_API_TOKEN", "TTS_AUTH_TOKEN", "tts_api_token"),
+    )
+    allow_mock_tts: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("ALLOW_MOCK_TTS", "TTS_ALLOW_MOCK", "allow_mock_tts"),
+    )
     tts_batch_size: int = Field(default=16, validation_alias=AliasChoices("TTS_BATCH_SIZE", "tts_batch_size"))
     tts_max_concurrent_requests: int = Field(
         default=2,

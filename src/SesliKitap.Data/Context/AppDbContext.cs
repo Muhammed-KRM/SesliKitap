@@ -27,6 +27,9 @@ public partial class AppDbContext : DbContext
     /// <summary>Kitap bölümleri tablosu.</summary>
     public virtual DbSet<BookChapter> BookChapters => Set<BookChapter>();
 
+    /// <summary>Ses profilleri tablosu.</summary>
+    public virtual DbSet<VoiceProfile> VoiceProfiles => Set<VoiceProfile>();
+
     /// <summary>HTTP uç noktası (endpoint) istek/yanıt logları (Katman 1).</summary>
     public virtual DbSet<EndpointLog> EndpointLogs => Set<EndpointLog>();
 
@@ -64,15 +67,26 @@ public partial class AppDbContext : DbContext
 
     private static void ApplySnakeCaseNaming(IMutableEntityType entityType)
     {
+        if (entityType.IsMappedToJson())
+        {
+            return;
+        }
+
         var tableName = entityType.GetTableName();
         if (!string.IsNullOrEmpty(tableName))
         {
             entityType.SetTableName(ToSnakeCase(tableName));
         }
 
+        var resolvedTable = entityType.GetTableName();
+        if (string.IsNullOrEmpty(resolvedTable))
+        {
+            return;
+        }
+
         foreach (var property in entityType.GetProperties())
         {
-            var storeObject = StoreObjectIdentifier.Table(entityType.GetTableName()!, entityType.GetSchema());
+            var storeObject = StoreObjectIdentifier.Table(resolvedTable, entityType.GetSchema());
             var columnName = property.GetColumnName(storeObject);
             if (!string.IsNullOrEmpty(columnName))
             {

@@ -33,4 +33,13 @@ public interface INotificationService
         string hataMesaji,
         bool kurtarilabilir,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Ses profili hazırlama ve örnek ses üretimi tamamlandığında bildirir (<c>VoiceProfileReady</c>).
+    /// </summary>
+    Task VoiceProfileReadyAsync(
+        Guid voiceProfileId,
+        bool basarili,
+        string? hataMesaji,
+        CancellationToken ct = default);
 }

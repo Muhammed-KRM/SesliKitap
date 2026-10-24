@@ -9,6 +9,7 @@ from collections.abc import Callable
 from config import ensure_directories, settings
 from consumers.base_consumer import BaseConsumer
 from consumers.book_import_consumer import BookImportConsumer
+from consumers.voice_profile_consumer import VoiceProfileConsumer
 from utils.janitor import run_janitor
 from utils.logger import get_logger, setup_logging
 
@@ -101,6 +102,7 @@ def main() -> int:
     supervisor = ConsumerSupervisor(
         factories={
             "BookImportConsumer": BookImportConsumer,
+            "VoiceProfileConsumer": VoiceProfileConsumer,
         }
     )
 

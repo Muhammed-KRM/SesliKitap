@@ -157,3 +157,25 @@ class PipelineErrorEvent(IntegrationEventBase):
     hata_kodu: str
     hata_mesaji: str
     kurtarilabilir: bool = False
+
+
+class VoiceProfileUploadedEvent(IntegrationEventBase):
+    """.NET API tarafından yayınlanan ses profili hazırlama ve örnek ses üretme isteği."""
+
+    voice_profile_id: str
+    ham_ses_yolu: str
+    referans_metin: str | None = None
+    ornek_metin: str
+
+
+class VoiceProfileReadyEvent(IntegrationEventBase):
+    """Python Worker ses profilini hazırladığında yayınlanan olay."""
+
+    voice_profile_id: str
+    basarili: bool
+    referans_ses_yolu: str | None = None
+    referans_hash: str | None = None
+    referans_sure_sn: float | None = None
+    ornek_ses_yolu: str | None = None
+    gpu_ms: int = 0
+    hata_mesaji: str | None = None
