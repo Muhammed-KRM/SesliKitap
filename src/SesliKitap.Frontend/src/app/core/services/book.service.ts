@@ -85,4 +85,8 @@ export class BookService extends ApiBaseService {
   reprocess(id: string): Observable<void> {
     return this.http.post<void>(this.url(`/books/${id}/reprocess`), {});
   }
+
+  startOcr(id: string): Observable<void> {
+    return this.http.post<void>(this.url(`/books/${id}/ocr`), {});
+  }
 }

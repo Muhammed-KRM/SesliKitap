@@ -199,4 +199,51 @@ public sealed class BooksController : BaseApiController
         await _exportService.WriteZipAsync(id, format, Response.Body, ct);
         return new EmptyResult();
     }
+
+    /// <summary>
+    /// Kitabın M4B (Apple Books) sesli kitap dışa aktarım dosyasını indirir; henüz üretilmediyse 202 döner ve üretimi başlatır (Faz 8).
+    /// </summary>
+    [HttpGet("{id:guid}/export/m4b")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ExportM4b(Guid id, CancellationToken ct = default)
+    {
+        var (isReady, storageKey, fileName, size) = await _exportService.GetOrRequestM4bAsync(id, TraceId, ct);
+        if (!isReady)
+        {
+            return Accepted(new { bookId = id, durum = "Hazirlaniyor", format = "m4b" });
+        }
+
+        Response.ContentType = "audio/mp4";
+        if (size > 0)
+        {
+            Response.ContentLength = size;
+        }
+
+        var contentDisposition = new System.Net.Mime.ContentDisposition
+        {
+            FileName = Uri.EscapeDataString(fileName),
+            Inline = false
+        };
+        Response.Headers.ContentDisposition = contentDisposition.ToString();
+
+        await _exportService.WriteM4bAsync(storageKey, Response.Body, ct);
+        return new EmptyResult();
+    }
+
+    /// <summary>
+    /// Taranmış (resim tabanlı) PDF kitabı için OCRmyPDF destekli metin çıkarma işlemini başlatır (Faz 8).
+    /// </summary>
+    [HttpPost("{id:guid}/ocr")]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> StartOcr(Guid id, CancellationToken ct = default)
+    {
+        await _bookService.StartOcrAsync(id, TraceId, ct);
+        return Accepted();
+    }
 }

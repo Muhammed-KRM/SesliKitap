@@ -96,4 +96,15 @@ public interface INotificationService
         DateTime istemciZamani,
         string? senderConnectionId = null,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// M4B sesli kitap dışa aktarım dosyası hazır olduğunda ilgili kitap grubuna bildirir (<c>ExportReady</c>) (Faz 8).
+    /// </summary>
+    Task ExportReadyAsync(
+        Guid bookId,
+        string format,
+        long boyut,
+        bool basarili = true,
+        string? hataMesaji = null,
+        CancellationToken ct = default);
 }

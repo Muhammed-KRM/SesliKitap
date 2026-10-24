@@ -9,11 +9,13 @@ namespace SesliKitap.Business.Events;
 /// <param name="TekrarEsigi">Üst/alt bilgi tekrar eşiği oranı (varsayılan 0.30).</param>
 /// <param name="MinBolumKelime">Birleştirme eşiği altındaki minimum bölüm kelime sayısı (varsayılan 300).</param>
 /// <param name="SozdeBolumKelime">Bölüm başlığı bulunamadığında oluşturulacak sözde bölüm kelime hedefi (varsayılan 4000).</param>
+/// <param name="OcrUygula">Taranmış PDF'e OCRmyPDF uygulanıp uygulanmayacağı (Faz 8).</param>
 public sealed record ProcessingSettings(
     double UstAltBolgeOrani = 0.08,
     double TekrarEsigi = 0.30,
     int MinBolumKelime = 300,
-    int SozdeBolumKelime = 4000);
+    int SozdeBolumKelime = 4000,
+    bool OcrUygula = false);
 
 /// <summary>
 /// Yeni yüklenen veya yeniden işlenecek bir kitabın Python Worker tarafından işlenmesi için yayınlanan olay.

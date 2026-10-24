@@ -15,6 +15,9 @@ public static class CacheKeys
     /// <summary>Ses profili listesi önbellek anahtarı.</summary>
     public const string VoiceList = Prefix + "voices:list";
 
+    /// <summary>Telaffuz sözlüğü listesi önbellek anahtarı (Faz 8).</summary>
+    public const string PronunciationList = Prefix + "pronunciations:list";
+
     /// <summary>
     /// Filtre özetine (hash) göre kütüphane kitap listesi önbellek anahtarı üretir.
     /// </summary>
@@ -65,4 +68,9 @@ public static class CacheKeys
     /// <param name="jobId">Sentez işi kimliği.</param>
     /// <returns>Redis anahtarı.</returns>
     public static string JobCancel(Guid jobId) => $"{Prefix}job:{jobId}:cancel";
+
+    /// <summary>
+    /// Aylık GPU kullanım özeti önbellek anahtarı üretir (Faz 8).
+    /// </summary>
+    public static string Usage(int year, int month) => $"{Prefix}usage:{year:D4}-{month:D2}";
 }

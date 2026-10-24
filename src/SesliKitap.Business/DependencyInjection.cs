@@ -134,6 +134,11 @@ public static class DependencyInjection
         services.AddScoped<IBookSearchProvider>(sp => sp.GetRequiredService<SearxngSearchProvider>());
         services.AddScoped<IDiscoveryService, DiscoveryManager>();
 
+        // 6.2) Faz 8 — Telaffuz Sözlüğü, Yer İmleri ve Kullanım Raporu Servisleri
+        services.AddScoped<IPronunciationService, PronunciationManager>();
+        services.AddScoped<IBookmarkService, BookmarkManager>();
+        services.AddScoped<IUsageService, UsageManager>();
+
         // 7) MassTransit + RabbitMQ (Python uyumu için Raw JSON)
         services.AddMassTransit(x =>
         {

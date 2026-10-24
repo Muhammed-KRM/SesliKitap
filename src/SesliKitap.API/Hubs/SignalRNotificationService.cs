@@ -265,6 +265,28 @@ public sealed partial class SignalRNotificationService : INotificationService
         }
     }
 
+    /// <inheritdoc />
+    public async Task ExportReadyAsync(
+        Guid bookId,
+        string format,
+        long boyut,
+        bool basarili = true,
+        string? hataMesaji = null,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var payload = new ExportReadyMessage(bookId, format, boyut, basarili, hataMesaji);
+            await _hubContext.Clients
+                .Group(HubGroups.Book(bookId))
+                .ExportReady(payload);
+        }
+        catch (Exception ex)
+        {
+            LogNotificationWarning(_logger, nameof(ExportReadyAsync), ex);
+        }
+    }
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "SignalR bildirimi gönderilemedi ({MethodName}); iş akışı devam ediyor.")]
     private static partial void LogNotificationWarning(ILogger logger, string methodName, Exception ex);
 }

@@ -9,6 +9,7 @@ class Queues:
     BOOK_IMPORT = "seslikitap.book-import"
     SYNTHESIS = "seslikitap.synthesis"
     VOICE_PROFILE = "seslikitap.voice-profile"
+    EXPORT = "seslikitap.export"
 
 
 class Exchanges:
@@ -18,6 +19,7 @@ class Exchanges:
     BOOK_IMPORT_REQUESTED = "BookImportRequestedEvent"
     SYNTHESIS_REQUESTED = "SynthesisRequestedEvent"
     VOICE_PROFILE_UPLOADED = "VoiceProfileUploadedEvent"
+    BOOK_EXPORT_REQUESTED = "BookExportRequestedEvent"
     BOOK_SOURCE_STORED = "BookSourceStoredEvent"
     BOOK_PROCESSED = "BookProcessedEvent"
     STAGE_CHANGED = "PipelineStageChangedEvent"
@@ -25,6 +27,7 @@ class Exchanges:
     VOICE_PROFILE_READY = "VoiceProfileReadyEvent"
     CHAPTER_SYNTHESIZED = "ChapterSynthesizedEvent"
     SYNTHESIS_COMPLETED = "SynthesisCompletedEvent"
+    BOOK_EXPORT_COMPLETED = "BookExportCompletedEvent"
     DLX = "seslikitap.dlx"
 
 

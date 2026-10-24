@@ -14,7 +14,9 @@ import {
 import { FormsModule } from '@angular/forms';
 import { T } from '../../core/i18n/tr';
 import { ChapterDetail, ChapterSummary } from '../../core/models/chapter.model';
+import { PronunciationPreviewResponse } from '../../core/models/faz8.model';
 import { ChapterService } from '../../core/services/chapter.service';
+import { PronunciationService } from '../../core/services/pronunciation.service';
 import { ToastService } from '../../core/services/toast.service';
 import { DurationPipe } from '../../shared/pipes/duration.pipe';
 
@@ -92,15 +94,42 @@ import { DurationPipe } from '../../shared/pipes/duration.pipe';
                     Bölüm Metni (Bölmek istediğiniz noktaya imleci koyup "İmleçten Böl" düğmesine
                     basabilirsiniz)
                   </label>
-                  <button
-                    type="button"
-                    (click)="splitAtCursor()"
-                    [disabled]="saving()"
-                    class="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-brand-500/20 text-xs font-semibold text-brand-400 transition"
-                  >
-                    ✂ {{ t.bookDetail.splitAtCursor }}
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      (click)="previewPronunciation()"
+                      class="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-400 transition"
+                    >
+                      🔊 Telaffuz Önizle
+                    </button>
+                    <button
+                      type="button"
+                      (click)="splitAtCursor()"
+                      [disabled]="saving()"
+                      class="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-brand-500/20 text-xs font-semibold text-brand-400 transition"
+                    >
+                      ✂ {{ t.bookDetail.splitAtCursor }}
+                    </button>
+                  </div>
                 </div>
+
+                @if (pronunciationPreview(); as prev) {
+                  <div class="mb-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-semibold text-emerald-300">
+                        Telaffuz Önizleme ({{ prev.uygulananKuralSayisi }} kural uygulandı)
+                      </span>
+                      <button
+                        type="button"
+                        (click)="pronunciationPreview.set(null)"
+                        class="text-slate-400 hover:text-slate-200"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <p class="text-slate-200 line-clamp-4">{{ prev.donusturulmusMetin }}</p>
+                  </div>
+                }
 
                 <textarea
                   #editorArea
@@ -139,6 +168,7 @@ import { DurationPipe } from '../../shared/pipes/duration.pipe';
 })
 export class ChapterEditorComponent {
   private readonly chapterService = inject(ChapterService);
+  private readonly pronunciationService = inject(PronunciationService);
   private readonly toast = inject(ToastService);
 
   @ViewChild('editorArea') editorArea?: ElementRef<HTMLTextAreaElement>;
@@ -152,6 +182,7 @@ export class ChapterEditorComponent {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly conflictDetected = signal(false);
+  readonly pronunciationPreview = signal<PronunciationPreviewResponse | null>(null);
 
   readonly title = signal('');
   readonly text = signal('');
@@ -258,6 +289,15 @@ export class ChapterEditorComponent {
   }
 
   close(): void {
+    this.pronunciationPreview.set(null);
     this.closed.emit();
+  }
+
+  previewPronunciation(): void {
+    const sample = this.text().trim().slice(0, 5000);
+    if (!sample) return;
+    this.pronunciationService.preview(sample).subscribe({
+      next: (res) => this.pronunciationPreview.set(res)
+    });
   }
 }

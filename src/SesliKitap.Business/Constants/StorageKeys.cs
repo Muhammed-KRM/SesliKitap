@@ -82,4 +82,14 @@ public static class StorageKeys
     /// Sentez işi girdi JSON anahtarı: <c>synthesis/{jobId}/input.json</c>.
     /// </summary>
     public static string SynthesisInput(Guid jobId) => $"synthesis/{jobId:D}/input.json";
+
+    /// <summary>
+    /// Kitap M4B dışa aktarım dosyası anahtarı: <c>books/{bookId}/export/{slug}.m4b</c> (Faz 8).
+    /// </summary>
+    public static string BookExportM4b(Guid bookId, string slug) => $"books/{bookId:D}/export/{slug}.m4b";
+
+    /// <summary>
+    /// Kitap dışa aktarım klasörü öneki: <c>books/{bookId}/export/</c> (Faz 8).
+    /// </summary>
+    public static string BookExportPrefix(Guid bookId) => $"books/{bookId:D}/export/";
 }

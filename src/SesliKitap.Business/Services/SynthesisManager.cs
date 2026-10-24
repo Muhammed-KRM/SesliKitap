@@ -36,6 +36,7 @@ public sealed class SynthesisManager : ISynthesisService
     private readonly IValidator<SynthesisStartRequest> _startValidator;
     private readonly TtsOptions _ttsOptions;
     private readonly SynthesisDefaultsOptions _defaultsOptions;
+    private readonly IPronunciationService? _pronunciationService;
 
     /// <summary>
     /// <see cref="SynthesisManager"/> sınıfının yeni bir örneğini başlatır.
@@ -54,7 +55,8 @@ public sealed class SynthesisManager : ISynthesisService
         IClock clock,
         IValidator<SynthesisStartRequest> startValidator,
         IOptions<TtsOptions> ttsOptions,
-        IOptions<SynthesisDefaultsOptions> defaultsOptions)
+        IOptions<SynthesisDefaultsOptions> defaultsOptions,
+        IPronunciationService? pronunciationService = null)
     {
         ArgumentNullException.ThrowIfNull(jobRepository);
         ArgumentNullException.ThrowIfNull(bookRepository);
@@ -85,6 +87,7 @@ public sealed class SynthesisManager : ISynthesisService
         _startValidator = startValidator;
         _ttsOptions = ttsOptions.Value;
         _defaultsOptions = defaultsOptions.Value;
+        _pronunciationService = pronunciationService;
     }
 
     /// <inheritdoc />
@@ -284,6 +287,16 @@ public sealed class SynthesisManager : ISynthesisService
             await _jobRepository.SaveChangesAsync(token);
         }, ct);
 
+        IReadOnlyList<SynthesisInputPronunciation> pronunciationEntries = [];
+        if (_pronunciationService is not null)
+        {
+            var allPronunciations = await _pronunciationService.GetAllAsync(ct);
+            pronunciationEntries = allPronunciations
+                .Where(p => p.AktifMi)
+                .Select(p => new SynthesisInputPronunciation(p.Kelime, p.Okunus, p.BuyukKucukDuyarli))
+                .ToList();
+        }
+
         var inputPayload = new SynthesisInputPayload(
             jobId,
             new SynthesisInputBook(book.Id, book.Baslik, book.Yazar, book.KapakYolu),
@@ -304,7 +317,7 @@ public sealed class SynthesisManager : ISynthesisService
                 jobSettings.OpusBitrateKbps,
                 jobSettings.Mp3BitrateKbps,
                 jobSettings.HedefLufs),
-            [],
+            pronunciationEntries,
             chapters
                 .Select(c => new SynthesisInputChapter(
                     c.Id,
@@ -665,6 +678,8 @@ public sealed class SynthesisManager : ISynthesisService
             var oldPrefix = $"books/{chapterEvent.BookId:D}/audio/{chapterEvent.ChapterId:D}/v{oldVersion.Value}/";
             await _storage.DeleteByPrefixAsync(oldPrefix, ct);
         }
+
+        await _storage.DeleteByPrefixAsync(StorageKeys.BookExportPrefix(chapterEvent.BookId), ct);
 
         await _cache.RemoveAsync(CacheKeys.ChapterAudioInfo(chapter.Id, "opus"), ct);
         await _cache.RemoveAsync(CacheKeys.ChapterAudioInfo(chapter.Id, "mp3"), ct);

@@ -16,11 +16,13 @@ import { ThemeService } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../shared/components/confirm-dialog.component';
 import { FileSizePipe } from '../../shared/pipes/file-size.pipe';
+import { PronunciationEditorComponent } from './pronunciation-editor.component';
+import { UsagePanelComponent } from './usage-panel.component';
 
 @Component({
   selector: 'app-settings-page',
   standalone: true,
-  imports: [FormsModule, FileSizePipe],
+  imports: [FormsModule, FileSizePipe, UsagePanelComponent, PronunciationEditorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-4xl mx-auto px-4 md:px-6 py-6 space-y-6">
@@ -149,6 +151,12 @@ import { FileSizePipe } from '../../shared/pipes/file-size.pipe';
           Tüm Çevrimdışı Verileri Sil
         </button>
       </section>
+
+      <!-- Aylık GPU Kullanımı ve Maliyet Raporu (Faz 8) -->
+      <app-usage-panel />
+
+      <!-- Telaffuz Sözlüğü (Faz 8) -->
+      <app-pronunciation-editor />
 
       <!-- Sistem Sağlığı -->
       <section

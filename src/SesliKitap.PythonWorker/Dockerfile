@@ -9,12 +9,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     libsndfile1 \
+    tesseract-ocr \
+    tesseract-ocr-tur \
+    ghostscript \
+    qpdf \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt ocrmypdf
 
 COPY . .
 

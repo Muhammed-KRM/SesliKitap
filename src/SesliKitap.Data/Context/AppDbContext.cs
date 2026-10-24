@@ -39,6 +39,12 @@ public partial class AppDbContext : DbContext
     /// <summary>Kitap dinleme konumları tablosu.</summary>
     public virtual DbSet<ListeningProgress> ListeningProgresses => Set<ListeningProgress>();
 
+    /// <summary>Kitap yer imleri tablosu (Faz 8).</summary>
+    public virtual DbSet<Bookmark> Bookmarks => Set<Bookmark>();
+
+    /// <summary>Telaffuz sözlüğü girdileri tablosu (Faz 8).</summary>
+    public virtual DbSet<PronunciationEntry> PronunciationEntries => Set<PronunciationEntry>();
+
     /// <summary>HTTP uç noktası (endpoint) istek/yanıt logları (Katman 1).</summary>
     public virtual DbSet<EndpointLog> EndpointLogs => Set<EndpointLog>();
 

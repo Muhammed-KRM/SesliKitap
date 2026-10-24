@@ -64,6 +64,11 @@ export class MediaTokenService {
     return `${environment.apiUrl}/books/${bookId}/export?format=${format}&t=${encodeURIComponent(token)}`;
   }
 
+  async exportM4bUrl(bookId: string): Promise<string> {
+    const token = await this.getToken();
+    return `${environment.apiUrl}/books/${bookId}/export/m4b?t=${encodeURIComponent(token)}`;
+  }
+
   invalidate(): void {
     this.currentToken.set(null);
     this.expiresAtMs = 0;

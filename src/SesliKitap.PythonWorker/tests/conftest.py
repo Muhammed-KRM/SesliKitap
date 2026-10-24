@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from config import settings
 from models.events import (
+    BookExportCompletedEvent,
     BookProcessedEvent,
     BookSourceStoredEvent,
     ChapterSynthesizedEvent,
@@ -76,6 +77,7 @@ class FakeRabbitMQPublisher:
         self.error_events: list[PipelineErrorEvent] = []
         self.chapter_synthesized_events: list[ChapterSynthesizedEvent] = []
         self.synthesis_completed_events: list[SynthesisCompletedEvent] = []
+        self.export_completed_events: list[BookExportCompletedEvent] = []
         self.raw_events: list[tuple[str, Any]] = []
 
     def publish_raw(self, exchange_short_name: str, payload: dict[str, Any] | IntegrationEventBase) -> None:
@@ -93,6 +95,10 @@ class FakeRabbitMQPublisher:
 
     def publish_synthesis_completed(self, event: SynthesisCompletedEvent) -> None:
         self.synthesis_completed_events.append(event)
+
+    def publish_book_export_completed(self, event: BookExportCompletedEvent) -> None:
+        self.export_completed_events.append(event)
+        self.publish_raw("BookExportCompletedEvent", event)
 
     def publish_stage_changed(
         self,

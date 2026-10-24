@@ -74,6 +74,14 @@ export interface ProgressUpdatedMsg {
   istemciZamani: string;
 }
 
+export interface ExportReadyMsg {
+  bookId: string;
+  format: string;
+  dosyaBoyutu: number;
+  basariliMi: boolean;
+  hataMesaji?: string | null;
+}
+
 export type HubConnectionStatus = 'connected' | 'reconnecting' | 'disconnected';
 
 @Injectable({ providedIn: 'root' })
@@ -94,6 +102,7 @@ export class SignalrService {
   readonly voiceProfileReady$ = new Subject<VoiceProfileReadyMsg>();
   readonly pipelineError$ = new Subject<PipelineErrorMsg>();
   readonly progressUpdated$ = new Subject<ProgressUpdatedMsg>();
+  readonly exportReady$ = new Subject<ExportReadyMsg>();
 
   private readonly bookGroupCounts = new Map<string, number>();
   private libraryRefCount = 0;
@@ -275,6 +284,10 @@ export class SignalrService {
 
     conn.on('ProgressUpdated', (msg: ProgressUpdatedMsg) => {
       this.progressUpdated$.next(msg);
+    });
+
+    conn.on('ExportReady', (msg: ExportReadyMsg) => {
+      this.exportReady$.next(msg);
     });
   }
 }

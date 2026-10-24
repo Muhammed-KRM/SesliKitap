@@ -8,6 +8,7 @@ import pika
 
 from config import settings
 from models.events import (
+    BookExportCompletedEvent,
     BookProcessedEvent,
     BookSourceStoredEvent,
     ChapterSynthesizedEvent,
@@ -113,6 +114,10 @@ class RabbitMQPublisher:
     def publish_synthesis_completed(self, event: SynthesisCompletedEvent) -> None:
         """SynthesisCompletedEvent yayınlar."""
         self.publish_raw(Exchanges.SYNTHESIS_COMPLETED, event)
+
+    def publish_book_export_completed(self, event: BookExportCompletedEvent) -> None:
+        """BookExportCompletedEvent yayınlar."""
+        self.publish_raw(Exchanges.BOOK_EXPORT_COMPLETED, event)
 
     def publish_stage_changed(
         self,

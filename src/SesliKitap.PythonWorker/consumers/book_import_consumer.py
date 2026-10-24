@@ -20,6 +20,7 @@ from models.events import (
 from pipeline.cleaning.scanned_pdf_detector import ScannedPdfDetector
 from pipeline.cleaning.text_cleaner import TextCleaner
 from pipeline.extraction import get_extractor
+from pipeline.extraction.ocr_processor import OcrProcessor
 from pipeline.structure.chapter_detector import ChapterDetector
 from pipeline.structure.chapter_post_processor import ChapterPostProcessor
 from pipeline.structure.metadata_resolver import MetadataResolver
@@ -52,12 +53,14 @@ class BookImportConsumer(BaseConsumer[BookImportRequestedEvent]):
         publisher: RabbitMQPublisher | None = None,
         pipeline_logger: PipelineLogger | None = None,
         downloader: SafeDownloader | None = None,
+        ocr_processor: OcrProcessor | None = None,
     ) -> None:
         super().__init__(publisher=publisher, pipeline_logger=pipeline_logger)
         self.minio = minio_client or MinioStorageClient()
         self.scanned_detector = ScannedPdfDetector()
         self.metadata_resolver = MetadataResolver()
         self.downloader = downloader or SafeDownloader()
+        self.ocr_processor = ocr_processor or OcrProcessor()
 
     def handle(self, message: BookImportRequestedEvent) -> None:
         book_id = message.book_id
@@ -121,6 +124,19 @@ class BookImportConsumer(BaseConsumer[BookImportRequestedEvent]):
                     recoverable=False,
                 )
 
+            # 1.5) %8 - Taranmış PDF için OCRmyPDF (Faz 8)
+            if ext == "pdf" and message.ayarlar.ocr_uygula:
+                self.default_stage = Stage.OCR
+                self._report_stage(
+                    book_id=book_id,
+                    stage=Stage.OCR,
+                    pct=8,
+                    msg="Taranmış PDF sayfalarına Türkçe OCR uygulanıyor...",
+                    trace_id=trace_id,
+                )
+                ocr_output = job_dir / "ocr_output.pdf"
+                local_source = self.ocr_processor.process(local_source, ocr_output)
+
             # 2) %10 - Metin Çıkarma
             self.default_stage = Stage.METIN_CIKARMA
             self._report_stage(
@@ -142,7 +158,7 @@ class BookImportConsumer(BaseConsumer[BookImportRequestedEvent]):
                 trace_id=trace_id,
             )
             scan_result = self.scanned_detector.analyze(doc)
-            if scan_result.is_scanned:
+            if scan_result.is_scanned and not message.ayarlar.ocr_uygula:
                 logger.warning(
                     "Kitap taranmış PDF olarak tespit edildi: bookId=%s, oran=%.2f",
                     book_id,

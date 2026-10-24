@@ -94,3 +94,13 @@ public sealed record ProgressUpdatedMessage(
     string CihazKimligi,
     string? CihazAdi,
     DateTime IstemciZamani);
+
+/// <summary>
+/// M4B dışa aktarım hazır bildirimi yükü (<c>ExportReady</c>) (Faz 8).
+/// </summary>
+public sealed record ExportReadyMessage(
+    Guid BookId,
+    string Format,
+    long Boyut,
+    bool Basarili = true,
+    string? HataMesaji = null);

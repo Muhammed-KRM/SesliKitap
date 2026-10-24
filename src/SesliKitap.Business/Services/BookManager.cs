@@ -426,6 +426,60 @@ public sealed class BookManager : IBookService
     }
 
     /// <inheritdoc />
+    public async Task StartOcrAsync(Guid id, string traceId, CancellationToken ct = default)
+    {
+        var book = await _bookRepository.GetByIdAsync(id, ct)
+            ?? throw new NotFoundException("Kitap", id);
+
+        if (book.DosyaFormati != DosyaFormati.Pdf)
+        {
+            throw new BusinessException("OCR işlemi yalnızca PDF formatındaki kitaplar için uygulanabilir.");
+        }
+
+        if (string.IsNullOrEmpty(book.OrijinalDosyaYolu))
+        {
+            throw new BusinessException("Kitabın orijinal PDF kaynak dosyası bulunamadı.");
+        }
+
+        var activeJob = await _cache.GetStringAsync(CacheKeys.ActiveJob(id), ct);
+        if (!string.IsNullOrEmpty(activeJob) || book.Durum == KitapDurumu.Seslendiriliyor)
+        {
+            throw new ConflictException("Seslendirme devam ederken OCR başlatılamaz.");
+        }
+
+        await _bookRepository.ExecuteInTransactionAsync(async token =>
+        {
+            await _chapterRepository.DeleteByBookIdAsync(id, token);
+
+            book.Durum = KitapDurumu.Isleniyor;
+            book.HataMesaji = null;
+            book.KelimeSayisi = 0;
+            book.ToplamSureSn = 0;
+            book.Metadata = null;
+
+            _bookRepository.Update(book);
+            await _bookRepository.SaveChangesAsync(token);
+        }, ct);
+
+        var importEvent = new BookImportRequestedEvent
+        {
+            TraceId = traceId,
+            BookId = book.Id,
+            KaynakTipi = book.KaynakTipi,
+            OrijinalDosyaYolu = book.OrijinalDosyaYolu,
+            DosyaFormati = DosyaFormati.Pdf,
+            BeklenenFormat = "pdf",
+            Ayarlar = new ProcessingSettings(OcrUygula: true)
+        };
+
+        await _eventPublisher.PublishAsync(importEvent, ct);
+
+        await _cache.RemoveAsync(CacheKeys.Book(id), ct);
+        await _cache.RemoveByPrefixAsync(CacheKeys.BookListPrefix, ct);
+        await _notifications.BookStatusChangedAsync(id, KitapDurumu.Isleniyor, ct);
+    }
+
+    /// <inheritdoc />
     public async Task<(Stream Stream, string ContentType, string ETag)> OpenCoverAsync(Guid id, CancellationToken ct = default)
     {
         var book = await _bookRepository.GetByIdAsync(id, ct)

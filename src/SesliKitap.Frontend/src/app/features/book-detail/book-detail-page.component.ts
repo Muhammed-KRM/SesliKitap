@@ -131,6 +131,13 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
                       >
                         ZIP İndir (MP3)
                       </button>
+                      <button
+                        type="button"
+                        (click)="exportM4b()"
+                        class="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition border-t border-slate-200 dark:border-slate-800"
+                      >
+                        M4B İndir (Apple Books)
+                      </button>
                     </div>
                   }
                 </div>
@@ -172,9 +179,16 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
         <!-- OCR Gerekli Uyarısı -->
         @if (b.durum === 'OcrGerekli') {
           <div
-            class="p-4 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm flex items-center justify-between gap-4"
+            class="p-4 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm flex flex-wrap items-center justify-between gap-4"
           >
             <span>{{ t.bookDetail.ocrWarning }}</span>
+            <button
+              type="button"
+              (click)="startOcr()"
+              class="px-4 py-2 min-h-[40px] rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold whitespace-nowrap transition"
+            >
+              🔍 {{ t.bookDetail.runOcr }}
+            </button>
           </div>
         }
 
@@ -346,6 +360,23 @@ export class BookDetailPageComponent implements OnInit {
           this.loadBook();
         }
       });
+
+    this.signalr.exportReady$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((msg) => {
+        if (msg.bookId === this.id()) {
+          if (msg.basariliMi) {
+            this.toast.success('M4B sesli kitap dosyası hazır!', undefined, {
+              label: 'İndir',
+              callback: () => {
+                void this.downloadReadyM4b();
+              }
+            });
+          } else {
+            this.toast.error(msg.hataMesaji || 'M4B dışa aktarma başarısız oldu.');
+          }
+        }
+      });
   }
 
   loadBook(): void {
@@ -381,6 +412,46 @@ export class BookDetailPageComponent implements OnInit {
     } catch {
       this.toast.error('Dışa aktarma bağlantısı oluşturulamadı.');
     }
+  }
+
+  async exportM4b(): Promise<void> {
+    this.exportMenuOpen.set(false);
+    const b = this.book();
+    if (!b) return;
+    try {
+      const url = await this.mediaToken.exportM4bUrl(b.id);
+      const res = await fetch(url, { method: 'GET' });
+      if (res.status === 202) {
+        this.toast.info('M4B dosyası hazırlanıyor. Tamamlandığında bildirim alacaksınız.');
+        return;
+      }
+      if (res.ok) {
+        await res.body?.cancel();
+        window.open(url, '_blank');
+        return;
+      }
+      this.toast.error('M4B dışa aktarma başlatılamadı.');
+    } catch {
+      this.toast.error('M4B dışa aktarma bağlantısı oluşturulamadı.');
+    }
+  }
+
+  private async downloadReadyM4b(): Promise<void> {
+    const b = this.book();
+    if (!b) return;
+    const url = await this.mediaToken.exportM4bUrl(b.id);
+    window.open(url, '_blank');
+  }
+
+  startOcr(): void {
+    const b = this.book();
+    if (!b) return;
+    this.bookService.startOcr(b.id).subscribe({
+      next: () => {
+        this.toast.info('OCR metin çıkarma işlemi başlatıldı.');
+        this.loadBook();
+      }
+    });
   }
 
   onChaptersUpdated(chapters: ChapterSummary[]): void {

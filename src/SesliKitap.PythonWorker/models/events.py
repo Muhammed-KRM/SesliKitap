@@ -70,6 +70,7 @@ class ProcessingSettingsModel(CamelModel):
     tekrar_esigi: float = 0.30
     min_bolum_kelime: int = 300
     sozde_bolum_kelime: int = 4000
+    ocr_uygula: bool = False
 
 
 class BookImportRequestedEvent(IntegrationEventBase):
@@ -231,3 +232,35 @@ class SynthesisCompletedEvent(IntegrationEventBase):
     toplam_gpu_ms: int = 0
     uretilen_ses_sn: float = 0.0
     kullanilan_motorlar: str | None = None
+
+
+class BookExportChapterItem(CamelModel):
+    """M4B dışa aktarımına dahil edilecek tekil bölüm bilgisi (Faz 8)."""
+
+    sira_no: int
+    baslik: str
+    ses_yolu: str
+    sure_sn: float = 0.0
+
+
+class BookExportRequestedEvent(IntegrationEventBase):
+    """.NET API tarafından yayınlanan M4B sesli kitap dışa aktarım üretim isteği olayı (Faz 8)."""
+
+    book_id: str
+    baslik: str
+    yazar: str | None = None
+    kapak_yolu: str | None = None
+    cikti_yolu: str
+    bolumler: list[BookExportChapterItem] = Field(default_factory=list)
+
+
+class BookExportCompletedEvent(IntegrationEventBase):
+    """M4B dışa aktarım üretimi tamamlandığında yayınlanan olay (Faz 8)."""
+
+    book_id: str
+    format: str = "m4b"
+    basarili: bool = True
+    dosya_yolu: str | None = None
+    boyut: int = 0
+    hata_mesaji: str | None = None
+

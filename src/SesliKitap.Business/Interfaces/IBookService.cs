@@ -49,6 +49,11 @@ public interface IBookService
     Task ReprocessAsync(Guid id, bool onay, string traceId, CancellationToken ct = default);
 
     /// <summary>
+    /// Taranmış (resim tabanlı) PDF kitabı için OCRmyPDF destekli metin çıkarma işlemini başlatır (Faz 8).
+    /// </summary>
+    Task StartOcrAsync(Guid id, string traceId, CancellationToken ct = default);
+
+    /// <summary>
     /// Kitap kapağını MinIO'dan akış olarak açar.
     /// </summary>
     Task<(Stream Stream, string ContentType, string ETag)> OpenCoverAsync(Guid id, CancellationToken ct = default);

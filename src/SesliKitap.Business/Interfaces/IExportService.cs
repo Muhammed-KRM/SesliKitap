@@ -28,4 +28,17 @@ public interface IExportService
     /// <param name="ct">İptal belirteci.</param>
     /// <returns>Güvenli dosya adı (ör. <c>Sefiller (MP3).zip</c>).</returns>
     Task<string> GetZipFileNameAsync(Guid bookId, string format, CancellationToken ct = default);
+
+    /// <summary>
+    /// Kitabın hazır M4B dışa aktarım dosyası MinIO'da mevcutsa bilgilerini döner; mevcut değilse Python Worker'a <c>BookExportRequestedEvent</c> yayınlar (Faz 8).
+    /// </summary>
+    Task<(bool IsReady, string StorageKey, string FileName, long Size)> GetOrRequestM4bAsync(
+        Guid bookId,
+        string traceId,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// MinIO'daki hazır M4B dosyasını hedef akışa yazar (Faz 8).
+    /// </summary>
+    Task WriteM4bAsync(string storageKey, Stream output, CancellationToken ct = default);
 }

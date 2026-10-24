@@ -49,4 +49,9 @@ public interface IAudiobookClient
     /// Cihazlar arası dinleme konumu güncelleme olayı.
     /// </summary>
     Task ProgressUpdated(ProgressUpdatedMessage message);
+
+    /// <summary>
+    /// M4B dışa aktarım hazır olayı (Faz 8).
+    /// </summary>
+    Task ExportReady(ExportReadyMessage message);
 }

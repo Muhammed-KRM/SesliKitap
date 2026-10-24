@@ -33,6 +33,7 @@ builder.Services
         bus.AddConsumer<VoiceProfileReadyConsumer>();
         bus.AddConsumer<ChapterSynthesizedConsumer>();
         bus.AddConsumer<SynthesisCompletedConsumer>();
+        bus.AddConsumer<BookExportCompletedConsumer>();
     })
     .AddScoped<INotificationService, SignalRNotificationService>()
     .AddHostedService<StuckJobWatchdogService>()

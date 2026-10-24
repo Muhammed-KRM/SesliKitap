@@ -293,6 +293,47 @@ namespace SesliKitap.Data.Migrations
                     b.ToTable("book_chapters", (string)null);
                 });
 
+            modelBuilder.Entity("SesliKitap.Data.Entities.Bookmark", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("book_id");
+
+                    b.Property<Guid>("ChapterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chapter_id");
+
+                    b.Property<DateTime?>("GuncellemeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("guncelleme_tarihi");
+
+                    b.Property<string>("Not")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("not");
+
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("olusturma_tarihi");
+
+                    b.Property<double>("PozisyonSn")
+                        .HasColumnType("double precision")
+                        .HasColumnName("pozisyon_sn");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("BookId", "OlusturmaTarihi");
+
+                    b.ToTable("bookmarks", (string)null);
+                });
+
             modelBuilder.Entity("SesliKitap.Data.Entities.EndpointLog", b =>
                 {
                     b.Property<long>("Id")
@@ -637,6 +678,56 @@ namespace SesliKitap.Data.Migrations
                     b.ToTable("pipeline_logs", (string)null);
                 });
 
+            modelBuilder.Entity("SesliKitap.Data.Entities.PronunciationEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Aciklama")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("aciklama");
+
+                    b.Property<bool>("AktifMi")
+                        .HasColumnType("boolean")
+                        .HasColumnName("aktif_mi");
+
+                    b.Property<bool>("BuyukKucukDuyarli")
+                        .HasColumnType("boolean")
+                        .HasColumnName("buyuk_kucuk_duyarli");
+
+                    b.Property<DateTime?>("GuncellemeTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("guncelleme_tarihi");
+
+                    b.Property<string>("Kelime")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("kelime");
+
+                    b.Property<string>("Okunus")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("okunus");
+
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("olusturma_tarihi");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AktifMi");
+
+                    b.HasIndex("Kelime")
+                        .IsUnique();
+
+                    b.ToTable("pronunciation_entries", (string)null);
+                });
+
             modelBuilder.Entity("SesliKitap.Data.Entities.SynthesisJob", b =>
                 {
                     b.Property<Guid>("Id")
@@ -920,6 +1011,25 @@ namespace SesliKitap.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Book");
+                });
+
+            modelBuilder.Entity("SesliKitap.Data.Entities.Bookmark", b =>
+                {
+                    b.HasOne("SesliKitap.Data.Entities.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SesliKitap.Data.Entities.BookChapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Chapter");
                 });
 
             modelBuilder.Entity("SesliKitap.Data.Entities.ListeningProgress", b =>
