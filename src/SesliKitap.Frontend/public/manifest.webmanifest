@@ -1,0 +1,20 @@
+{
+  "name": "SesliKitap",
+  "short_name": "SesliKitap",
+  "description": "Yapay zekâ destekli kişisel Türkçe sesli kitap üretim ve dinleme platformu",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "orientation": "portrait",
+  "lang": "tr",
+  "categories": ["books", "entertainment"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
