@@ -12,17 +12,16 @@ export interface SynthesisSettings {
 }
 
 export interface SynthesisEstimateDto {
-  bookId: string;
-  voiceProfileId: string;
-  seciliBolumSayisi: number;
-  toplamKelimeSayisi: number;
-  toplamKarakterSayisi: number;
-  tahminiSesSureSn: number;
-  tahminiGpuSureSn: number;
+  bolumSayisi: number;
+  kelimeSayisi: number;
+  tahminiSesSn: number;
+  tahminiGpuSn: number;
   tahminiMaliyetUsd: number;
   buAyHarcananUsd: number;
   aylikButceUsd: number;
-  butceAsiliyorMu: boolean;
+  kalanButceUsd: number;
+  butceAsiliyor: boolean;
+  onbellektekiTahminiParcaOrani: number;
 }
 
 export interface SynthesisStartRequest {
@@ -35,23 +34,24 @@ export interface SynthesisStartRequest {
 export interface SynthesisJobDto {
   id: string;
   bookId: string;
-  kitapBasligi: string;
+  kitapBaslik: string;
   voiceProfileId: string;
-  sesProfiliAdi: string;
+  sesProfiliAd: string;
   durum: SentezIsDurumu;
   yuzde: number;
-  mesaj: string | null;
+  toplamBolum: number;
+  tamamlananBolum: number;
+  hataliBolum: number;
   mevcutBolumId: string | null;
-  toplamBolumSayisi: number;
-  tamamlananBolumSayisi: number;
-  hataliBolumSayisi: number;
-  toplamKelimeSayisi: number;
-  tahminiSesSureSn: number;
-  gercekSesSureSn: number;
-  tahminiGpuSureSn: number;
-  gercekGpuSureSn: number;
-  tahminiMaliyetUsd: number;
+  mesaj: string | null;
+  motorSirasi?: string;
   kullanilanMotorlar: string | null;
+  gpuMs: number;
+  tahminiMaliyetUsd: number;
+  tahminiSureSn: number | null;
+  uretilenSesSn: number;
+  onbellektenParca: number;
+  uretilenParca: number;
   hataMesaji: string | null;
   olusturmaTarihi: string;
   baslangicZamani: string | null;

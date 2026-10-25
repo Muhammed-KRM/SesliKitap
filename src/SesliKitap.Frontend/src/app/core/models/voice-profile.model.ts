@@ -11,14 +11,15 @@ export interface VoiceProfileDto {
   id: string;
   ad: string;
   aciklama: string | null;
-  cinsiyet: SesCinsiyeti;
-  referansSureSn: number;
+  cinsiyet: SesCinsiyeti | null;
+  referansSureSn: number | null;
   referansMetin: string | null;
   durum: SesProfiliDurumu;
   hataMesaji: string | null;
   varsayilanMi: boolean;
   parametreler: VoiceParameters;
-  ornekVar: boolean;
+  ornekSesVar: boolean;
+  ornekVar?: boolean;
   olusturmaTarihi: string;
 }
 

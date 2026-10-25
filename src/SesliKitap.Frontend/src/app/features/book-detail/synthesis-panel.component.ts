@@ -85,7 +85,7 @@ export type SynthesisScope = 'missing' | 'all' | 'selected';
                   }
                 </div>
 
-                @if (vp.ornekVar) {
+                @if (vp.ornekSesVar || vp.ornekVar) {
                   <button
                     type="button"
                     (click)="playVoiceSample($event, vp.id)"
@@ -155,7 +155,7 @@ export type SynthesisScope = 'missing' | 'all' | 'selected';
               <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">
                 Canlı Seslendirme İlerlemesi
               </h3>
-              <app-status-badge [status]="job.durum" kind="job" />
+              <app-status-badge [status]="liveProgress() ? 'Calisiyor' : job.durum" kind="job" />
             </div>
 
             <div class="space-y-1.5">
@@ -182,7 +182,7 @@ export type SynthesisScope = 'missing' | 'all' | 'selected';
               <div class="p-3 rounded-xl bg-slate-50 dark:bg-surface-900">
                 <span class="text-slate-400 block">Tamamlanan Bölüm</span>
                 <span class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {{ job.tamamlananBolumSayisi }} / {{ job.toplamBolumSayisi }}
+                  {{ job.tamamlananBolum }} / {{ job.toplamBolum }}
                 </span>
               </div>
               <div class="p-3 rounded-xl bg-slate-50 dark:bg-surface-900">
@@ -216,19 +216,19 @@ export type SynthesisScope = 'missing' | 'all' | 'selected';
               <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-surface-900">
                 <span class="text-xs text-slate-400 block">Seçili Bölüm / Kelime</span>
                 <span class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {{ est.seciliBolumSayisi }} bölüm · {{ est.toplamKelimeSayisi }} kelime
+                  {{ est.bolumSayisi }} bölüm · {{ est.kelimeSayisi }} kelime
                 </span>
               </div>
               <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-surface-900">
                 <span class="text-xs text-slate-400 block">{{ t.synthesis.estimatedAudio }}</span>
                 <span class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {{ est.tahminiSesSureSn | duration }}
+                  {{ est.tahminiSesSn | duration }}
                 </span>
               </div>
               <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-surface-900">
                 <span class="text-xs text-slate-400 block">{{ t.synthesis.estimatedGpu }}</span>
                 <span class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {{ est.tahminiGpuSureSn | duration }}
+                  {{ est.tahminiGpuSn | duration }}
                 </span>
               </div>
               <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-surface-900">
@@ -249,11 +249,11 @@ export type SynthesisScope = 'missing' | 'all' | 'selected';
               </div>
               <app-progress-bar
                 [value]="budgetPercent()"
-                [variant]="est.butceAsiliyorMu ? 'rose' : 'emerald'"
+                [variant]="est.butceAsiliyor ? 'rose' : 'emerald'"
               />
             </div>
 
-            @if (est.butceAsiliyorMu) {
+            @if (est.butceAsiliyor) {
               <div
                 class="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs space-y-2"
               >
@@ -275,8 +275,8 @@ export type SynthesisScope = 'missing' | 'all' | 'selected';
             (click)="startSynthesis()"
             [disabled]="
               starting() ||
-              est.seciliBolumSayisi === 0 ||
-              (est.butceAsiliyorMu && !forceApproved)
+              est.bolumSayisi === 0 ||
+              (est.butceAsiliyor && !forceApproved)
             "
             class="w-full min-h-[44px] py-3 px-5 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-slate-950 font-semibold text-sm transition"
           >
@@ -351,6 +351,14 @@ export class SynthesisPanelComponent implements OnInit {
 
     this.loadVoices();
     this.checkActiveJob();
+
+    this.signalr.chapterReady$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((msg) => {
+        if (msg.bookId === this.bookId()) {
+          this.checkActiveJob();
+        }
+      });
 
     this.signalr.synthesisFinished$
       .pipe(takeUntilDestroyed(this.destroyRef))

@@ -29,7 +29,7 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
               }
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {{ profile().cinsiyet }} · Referans: {{ profile().referansSureSn.toFixed(1) }} sn
+              {{ profile().cinsiyet || 'Belirtilmemiş' }} · Referans: {{ (profile().referansSureSn ?? 0).toFixed(1) }} sn
             </p>
           </div>
           <app-status-badge [status]="profile().durum" kind="voice" />
@@ -50,7 +50,7 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
 
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
         <div class="flex items-center gap-2">
-          @if (profile().ornekVar && !sampleUrl()) {
+          @if ((profile().ornekSesVar || profile().ornekVar) && !sampleUrl()) {
             <button
               type="button"
               (click)="loadSample()"

@@ -1,11 +1,12 @@
 import { DosyaFormati, KitapDurumu, KitapKaynagi } from './enums';
 import { ChapterSummary } from './chapter.model';
+import { SynthesisJobDto } from './synthesis.model';
 
 export interface ExtractionStats {
-  silinenUstAltBilgiSayisi: number;
-  silinenDipnotSayisi: number;
-  birlestirilenTireliKelimeSayisi: number;
-  tespitYontemi: string;
+  silinenUstAltBilgiSayisi?: number;
+  silinenDipnotSayisi?: number;
+  birlestirilenTireliKelimeSayisi?: number;
+  tespitYontemi?: string;
 }
 
 export interface BookListDto {
@@ -28,24 +29,27 @@ export interface BookDetail {
   yazar: string | null;
   dil: string;
   aciklama: string | null;
-  kaynak: KitapKaynagi;
-  kaynakKimligi: string | null;
-  kaynakUrl: string | null;
-  format: DosyaFormati;
+  kaynakTipi?: KitapKaynagi;
+  kaynak?: KitapKaynagi;
+  dosyaFormati?: DosyaFormati;
+  format?: DosyaFormati;
   dosyaBoyutu: number;
   sayfaSayisi: number | null;
-  bolumSayisi: number;
-  hazirBolumSayisi: number;
-  toplamKelimeSayisi: number;
+  bolumSayisi?: number;
+  hazirBolumSayisi?: number;
+  kelimeSayisi?: number;
+  toplamKelimeSayisi?: number;
   toplamSureSn: number;
   durum: KitapDurumu;
   hataMesaji: string | null;
   varsayilanSesProfiliId: string | null;
   kapakVar: boolean;
-  cikarimIstatistikleri: ExtractionStats | null;
+  istatistik?: ExtractionStats | null;
+  cikarimIstatistikleri?: ExtractionStats | null;
   olusturmaTarihi: string;
   sonDinlenmeTarihi: string | null;
   bolumler: ChapterSummary[];
+  aktifIs?: SynthesisJobDto | null;
 }
 
 export interface BookUpdateRequest {

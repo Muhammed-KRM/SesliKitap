@@ -74,10 +74,10 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
                     [routerLink]="['/kitap', job.bookId]"
                     class="text-base font-bold text-slate-900 dark:text-slate-100 hover:text-brand-400"
                   >
-                    {{ job.kitapBasligi }}
+                    {{ job.kitapBaslik }}
                   </a>
                   <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Ses Profili: <span class="font-medium">{{ job.sesProfiliAdi }}</span> ·
+                    Ses Profili: <span class="font-medium">{{ job.sesProfiliAd }}</span> ·
                     {{ job.olusturmaTarihi | relativeTime }}
                     @if (job.kullanilanMotorlar) {
                       <span> · Motor: {{ job.kullanilanMotorlar }}</span>
@@ -92,7 +92,7 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
                 <div class="flex justify-between text-xs text-slate-400">
                   <span>{{ job.mesaj || '—' }}</span>
                   <span>
-                    {{ job.tamamlananBolumSayisi }} / {{ job.toplamBolumSayisi }} bölüm (%{{
+                    {{ job.tamamlananBolum }} / {{ job.toplamBolum }} bölüm (%{{
                       job.yuzde
                     }})
                   </span>
@@ -102,8 +102,8 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
 
               <div class="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs text-slate-400">
                 <div class="flex flex-wrap gap-4">
-                  <span>Ses: {{ (job.gercekSesSureSn || job.tahminiSesSureSn) | duration }}</span>
-                  <span>GPU: {{ (job.gercekGpuSureSn || job.tahminiGpuSureSn) | duration }}</span>
+                  <span>Ses: {{ (job.uretilenSesSn || job.tahminiSureSn || 0) | duration }}</span>
+                  <span>GPU: {{ ((job.gpuMs || 0) / 1000) | duration }}</span>
                   <span>
                     Maliyet: {{ job.tahminiMaliyetUsd | currency: 'USD' : 'symbol' : '1.2-4' }}
                   </span>

@@ -66,7 +66,7 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
               <div class="flex flex-wrap items-center gap-2.5">
                 <app-status-badge [status]="b.durum" kind="book" />
                 <span class="text-xs text-slate-400">
-                  {{ b.format }} · {{ b.dosyaBoyutu | fileSize }}
+                  {{ b.dosyaFormati ?? b.format }} · {{ b.dosyaBoyutu | fileSize }}
                 </span>
               </div>
 
@@ -78,8 +78,8 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
               </p>
 
               <div class="mt-3 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
-                <span>{{ b.hazirBolumSayisi }} / {{ b.bolumSayisi }} bölüm hazır</span>
-                <span>{{ b.toplamKelimeSayisi }} kelime</span>
+                <span>{{ readyChapterCount() }} / {{ includedChapterCount() }} bölüm hazır</span>
+                <span>{{ b.kelimeSayisi ?? b.toplamKelimeSayisi ?? 0 }} kelime</span>
                 @if (b.toplamSureSn > 0) {
                   <span>Toplam süre: {{ b.toplamSureSn | duration }}</span>
                 }
@@ -87,7 +87,7 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
             </div>
 
             <div class="flex flex-wrap items-center gap-2.5">
-              @if (b.hazirBolumSayisi > 0) {
+              @if (readyChapterCount() > 0) {
                 <a
                   [routerLink]="['/dinle', b.id]"
                   class="min-h-[44px] px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-slate-950 font-semibold text-sm flex items-center gap-2 transition"
@@ -259,23 +259,23 @@ import { SynthesisPanelComponent } from './synthesis-panel.component';
               <h3 class="font-bold text-slate-900 dark:text-slate-100">
                 Metin Çıkarma ve Temizleme İstatistikleri
               </h3>
-              @if (b.cikarimIstatistikleri; as stats) {
+              @if (b.istatistik ?? b.cikarimIstatistikleri; as stats) {
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-surface-900">
                     <span class="text-xs text-slate-400 block">Bölüm Tespit Yöntemi</span>
-                    <span class="font-semibold">{{ stats.tespitYontemi }}</span>
+                    <span class="font-semibold">{{ stats.tespitYontemi ?? '—' }}</span>
                   </div>
                   <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-surface-900">
                     <span class="text-xs text-slate-400 block">Silinen Üst/Alt Bilgi</span>
-                    <span class="font-semibold">{{ stats.silinenUstAltBilgiSayisi }}</span>
+                    <span class="font-semibold">{{ stats.silinenUstAltBilgiSayisi ?? 0 }}</span>
                   </div>
                   <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-surface-900">
                     <span class="text-xs text-slate-400 block">Silinen Dipnot</span>
-                    <span class="font-semibold">{{ stats.silinenDipnotSayisi }}</span>
+                    <span class="font-semibold">{{ stats.silinenDipnotSayisi ?? 0 }}</span>
                   </div>
                   <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-surface-900">
                     <span class="text-xs text-slate-400 block">Birleştirilen Tireli Kelime</span>
-                    <span class="font-semibold">{{ stats.birlestirilenTireliKelimeSayisi }}</span>
+                    <span class="font-semibold">{{ stats.birlestirilenTireliKelimeSayisi ?? 0 }}</span>
                   </div>
                 </div>
               } @else {
@@ -319,6 +319,21 @@ export class BookDetailPageComponent implements OnInit {
   readonly selectedForSynthesis = signal<string[]>([]);
 
   readonly bookIdComputed = computed(() => this.id());
+
+  readonly includedChapterCount = computed(() => {
+    const b = this.book();
+    if (!b) return 0;
+    return b.bolumSayisi ?? b.bolumler.filter((c) => c.dahilMi).length;
+  });
+
+  readonly readyChapterCount = computed(() => {
+    const b = this.book();
+    if (!b) return 0;
+    return (
+      b.hazirBolumSayisi ??
+      b.bolumler.filter((c) => c.sesDurumu === 'Hazir' || c.sesDurumu === 'GuncelDegil').length
+    );
+  });
 
   ngOnInit(): void {
     this.loadBook();
