@@ -61,6 +61,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
+        {
+            modelBuilder.Entity<Book>().Ignore(x => x.AramaVektoru);
+        }
+
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             ApplySnakeCaseNaming(entityType);

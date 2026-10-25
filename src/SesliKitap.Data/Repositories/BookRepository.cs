@@ -73,14 +73,19 @@ public sealed class BookRepository : GenericRepository<Book>, IBookRepository
             {
                 var pattern = $"%{term}%";
                 query = query.Where(b =>
+                    (b.AramaVektoru != null && b.AramaVektoru.Matches(EF.Functions.PlainToTsQuery("simple", term))) ||
                     EF.Functions.ILike(b.Baslik, pattern) ||
                     (b.Yazar != null && EF.Functions.ILike(b.Yazar, pattern)));
             }
             else
             {
+                var normalizedTerm = NormalizeTurkishSearch(term);
                 query = query.Where(b =>
                     b.Baslik.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    (b.Yazar != null && b.Yazar.Contains(term, StringComparison.OrdinalIgnoreCase)));
+                    NormalizeTurkishSearch(b.Baslik).Contains(normalizedTerm, StringComparison.Ordinal) ||
+                    (b.Yazar != null && (
+                        b.Yazar.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                        NormalizeTurkishSearch(b.Yazar).Contains(normalizedTerm, StringComparison.Ordinal))));
             }
         }
 
@@ -203,5 +208,27 @@ public sealed class BookRepository : GenericRepository<Book>, IBookRepository
                 await Context.SaveChangesAsync(ct);
             }
         }
+    }
+
+    private static string NormalizeTurkishSearch(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return string.Empty;
+        }
+
+        return input
+            .Replace('İ', 'i')
+            .Replace('I', 'i')
+            .Replace('ı', 'i')
+            .ToLowerInvariant()
+            .Replace('ç', 'c')
+            .Replace('ğ', 'g')
+            .Replace('ö', 'o')
+            .Replace('ş', 's')
+            .Replace('ü', 'u')
+            .Replace('â', 'a')
+            .Replace('î', 'i')
+            .Replace('û', 'u');
     }
 }

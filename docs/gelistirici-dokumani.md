@@ -5199,3 +5199,4 @@ tailscale serve --bg --https=443 http://localhost:8080
 | Sürüm | Tarih | Değişiklik |
 |---|---|---|
 | 1.0.0 | 23.10.2026 | İlk sürüm: amaç, kurallar, teknolojiler, mimari, dosya yapısı, fazlar ve test planı |
+| 1.1.0 | 25.10.2026 | Faz 0–9 (`v0.0.0` → `v1.0.0`) geliştirme tamamlandı; ADR-001..005 kararları, `Minio 6.0.3` kısmi okuma uyarlaması, geçici dosya tabanlı asenkron ZIP akışı, `AddBookSearchVector` (`tsvector` + `GIN`), `LogRetentionBackgroundService`, üretim Docker/Nginx yapılandırması ve kapsamlı Faz 9 test sonuçları işlendi |

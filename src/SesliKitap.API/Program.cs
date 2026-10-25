@@ -37,7 +37,8 @@ builder.Services
     })
     .AddScoped<INotificationService, SignalRNotificationService>()
     .AddHostedService<StuckJobWatchdogService>()
-    .AddHostedService<StorageCleanupBackgroundService>();
+    .AddHostedService<StorageCleanupBackgroundService>()
+    .AddHostedService<LogRetentionBackgroundService>();
 
 var app = builder.Build();
 app.UseApiPipeline();

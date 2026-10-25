@@ -119,6 +119,11 @@ public sealed class Book : AuditableEntity, ISoftDeletable
     public string? Metadata { get; set; }
 
     /// <summary>
+    /// PostgreSQL tam metin arama (tsvector) alanı (Faz 9).
+    /// </summary>
+    public NpgsqlTypes.NpgsqlTsVector? AramaVektoru { get; set; }
+
+    /// <summary>
     /// Kaydın yumuşak silinmiş olup olmadığını belirtir.
     /// </summary>
     public bool SilindiMi { get; set; }

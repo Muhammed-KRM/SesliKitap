@@ -70,5 +70,13 @@ public sealed class BookConfiguration : IEntityTypeConfiguration<Book>
         builder.HasIndex(x => x.OlusturmaTarihi)
             .HasDatabaseName("idx_books_olusturma_tarihi")
             .IsDescending();
+
+        builder.HasGeneratedTsVectorColumn(
+                x => x.AramaVektoru!,
+                "simple",
+                x => new { x.Baslik, x.Yazar })
+            .HasIndex(x => x.AramaVektoru)
+            .HasMethod("GIN")
+            .HasDatabaseName("idx_books_arama_vektoru");
     }
 }

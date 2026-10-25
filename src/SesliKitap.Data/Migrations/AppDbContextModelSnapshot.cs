@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using NpgsqlTypes;
 using SesliKitap.Data.Context;
 
 #nullable disable
@@ -32,6 +33,13 @@ namespace SesliKitap.Data.Migrations
                     b.Property<string>("Aciklama")
                         .HasColumnType("text")
                         .HasColumnName("aciklama");
+
+                    b.Property<NpgsqlTsVector>("AramaVektoru")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("tsvector")
+                        .HasColumnName("arama_vektoru")
+                        .HasAnnotation("Npgsql:TsVectorConfig", "simple")
+                        .HasAnnotation("Npgsql:TsVectorProperties", new[] { "Baslik", "Yazar" });
 
                     b.Property<string>("Baslik")
                         .IsRequired()
@@ -148,6 +156,11 @@ namespace SesliKitap.Data.Migrations
                         .HasColumnName("yazar");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AramaVektoru")
+                        .HasDatabaseName("idx_books_arama_vektoru");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("AramaVektoru"), "GIN");
 
                     b.HasIndex("DosyaHash")
                         .IsUnique()
