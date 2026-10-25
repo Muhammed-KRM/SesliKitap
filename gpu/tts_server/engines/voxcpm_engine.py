@@ -52,6 +52,12 @@ class VoxCpmEngine(BaseTtsServerEngine):
         tts_inner = getattr(self._model, "tts_model", self._model)
         self.sample_rate = int(getattr(tts_inner, "sample_rate", 48000))
         self._supported_params = set(inspect.signature(self._model.generate).parameters.keys())
+        if not ({"reference_wav_path", "prompt_wav_path"} & self._supported_params):
+            # Eski voxcpm (<2.0) sürümleri referans sesi hata vermeden yok sayıp klonsuz üretir.
+            raise RuntimeError(
+                "Yüklü voxcpm sürümü ses klonlamayı desteklemiyor "
+                "(generate() içinde reference_wav_path/prompt_wav_path yok). voxcpm>=2.0 gerekli."
+            )
         self.is_loaded = True
         logger.info(
             "VoxCPM2 modeli yüklendi: sample_rate=%d, params=%s",

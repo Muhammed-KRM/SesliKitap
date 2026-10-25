@@ -17,6 +17,9 @@ from utils.constants import (
     QUALITY_MS_PER_CHAR_MIN,
     QUALITY_SILENCE_RMS_DBFS,
     QUALITY_SPEECH_FRAME_DBFS,
+    QUALITY_TONAL_RATIO_MAX,
+    QUALITY_TONAL_TOP_BINS,
+    QUALITY_TONAL_WINDOW_SEC,
 )
 
 
@@ -38,6 +41,43 @@ def _rms_dbfs(samples: np.ndarray) -> float:
     return 10.0 * math.log10(mean_sq)
 
 
+def tonal_ratio(
+    samples: np.ndarray,
+    sample_rate: int,
+    *,
+    window_sec: float = QUALITY_TONAL_WINDOW_SEC,
+    top_bins: int = QUALITY_TONAL_TOP_BINS,
+) -> float | None:
+    """Sinyalin ne kadar "saf ton" olduğunu 0..1 arasında döndürür (medyan, pencere bazlı).
+
+    Gerçek konuşma enerjiyi geniş bir spektruma yayar (~0.2-0.5); sinüs/harmonik ton ise
+    birkaç FFT binine toplanır (~0.9). Ölçülebilecek kadar uzun/enerjili pencere yoksa ``None``.
+    """
+    win = max(256, int(sample_rate * window_sec))
+    if len(samples) < win // 2:
+        return None
+
+    x = np.asarray(samples, dtype=np.float64)
+    hop = max(1, win // 2)
+    starts = range(0, max(1, len(x) - win + 1), hop) if len(x) >= win else [0]
+    ratios: list[float] = []
+    for start in starts:
+        w = x[start : start + win]
+        w = w - float(np.mean(w))
+        if float(np.sqrt(np.mean(np.square(w)))) < 1e-4:
+            continue
+        spec = np.abs(np.fft.rfft(w * np.hanning(len(w)))) ** 2
+        total = float(spec.sum())
+        if total <= 0.0:
+            continue
+        k = min(top_bins, len(spec))
+        ratios.append(float(np.partition(spec, -k)[-k:].sum() / total))
+
+    if not ratios:
+        return None
+    return float(np.median(ratios))
+
+
 class QualityChecker:
     """Üretilen TTS parça sesini 4 sinyal kriterine göre denetler ve puanlar."""
 
@@ -51,6 +91,7 @@ class QualityChecker:
         clipping_threshold: float = QUALITY_CLIPPING_THRESHOLD,
         max_clipping_ratio: float = QUALITY_MAX_CLIPPING_RATIO,
         max_internal_silence_sec: float = QUALITY_MAX_INTERNAL_SILENCE_SEC,
+        tonal_ratio_max: float = QUALITY_TONAL_RATIO_MAX,
     ) -> None:
         self.ms_per_char_min = ms_per_char_min
         self.ms_per_char_max = ms_per_char_max
@@ -60,6 +101,7 @@ class QualityChecker:
         self.clipping_threshold = clipping_threshold
         self.max_clipping_ratio = max_clipping_ratio
         self.max_internal_silence_sec = max_internal_silence_sec
+        self.tonal_ratio_max = tonal_ratio_max
 
     def check(self, chunk: Chunk, audio: ChunkAudio) -> QualityReport:
         """Parça sesini denetler; ihlalleri ve 0..1 arası kalite puanını döner."""
@@ -127,6 +169,12 @@ class QualityChecker:
         if max_silence_sec > self.max_internal_silence_sec:
             reasons.append("long_gap")
             penalty += 0.25
+
+        # 5) Tonal sinyal (sinüs/"vuvuvu"): konuşma değil, saf ton -> kesin ret
+        tonal = tonal_ratio(samples, sr)
+        if tonal is not None and tonal > self.tonal_ratio_max:
+            reasons.append("tonal_signal")
+            penalty += 0.90
 
         score = round(max(0.0, 1.0 - penalty), 4)
         return QualityReport(ok=len(reasons) == 0, reasons=reasons, score=score)

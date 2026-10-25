@@ -1,12 +1,26 @@
-"""Modal.com Serverless L4 GPU üzerinde OpenBMB VoxCPM2 TTS sunucusu."""
+"""Modal.com Serverless L4 GPU üzerinde OpenBMB VoxCPM2 TTS sunucusu.
+
+Aynı kod iki farklı modelle (A/B kulak testi için) dağıtılabilir; model ve uygulama adı
+dağıtım sırasındaki ortam değişkenlerinden okunur:
+
+    # Temel model (Apache-2.0, Türkçe resmi destekli)
+    modal deploy gpu/modal_deploy.py
+
+    # Türkçe LoRA birleştirilmiş sürüm (Trendyol, MIT)
+    $env:SK_TTS_MODEL_ID = "Trendyol/Trendyol-TTS"; $env:SK_TTS_APP_SUFFIX = "trendyol"
+    modal deploy gpu/modal_deploy.py
+"""
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import modal
 
-APP_NAME = "seslikitap-tts-voxcpm2"
+MODEL_ID = os.environ.get("SK_TTS_MODEL_ID", "openbmb/VoxCPM2")
+APP_SUFFIX = os.environ.get("SK_TTS_APP_SUFFIX", "").strip()
+APP_NAME = "seslikitap-tts-voxcpm2" + (f"-{APP_SUFFIX}" if APP_SUFFIX else "")
 VOLUME_NAME = "seslikitap-tts-cache"
 SECRET_NAME = "seslikitap-tts-secret"
 GPU_DIR = Path(__file__).resolve().parent
@@ -23,7 +37,7 @@ image = (
             "HF_HOME": "/cache/hf",
             "TTS_VOICES_DIR": "/cache/voices",
             "TTS_ENGINE": "voxcpm2",
-            "TTS_MODEL_ID": "openbmb/VoxCPM2",
+            "TTS_MODEL_ID": MODEL_ID,
         }
     )
     .add_local_python_source("tts_server")
@@ -35,7 +49,7 @@ image = (
     image=image,
     volumes={"/cache": volume},
     secrets=[modal.Secret.from_name(SECRET_NAME)],
-    scaledown_window=300,
+    scaledown_window=120,
     timeout=600,
 )
 @modal.concurrent(max_inputs=1)
@@ -62,6 +76,8 @@ class VoxCpmServer:
             cache_dir=self.settings.hf_home,
         )
         self.engine.load()
+        # İndirilen model ağırlıkları ve kayıtlı referans sesler sonraki soğuk başlatmalar için kalıcı olsun.
+        volume.commit()
         self.fastapi_app = create_app(
             engine=self.engine,
             voice_store=self.voice_store,

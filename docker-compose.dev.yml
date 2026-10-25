@@ -1,4 +1,4 @@
-services:
+﻿services:
   postgres:
     image: postgres:16
     container_name: seslikitap-dev-postgres
@@ -80,8 +80,9 @@ services:
       MINIO_ENDPOINT: minio:9000
       REDIS_URL: redis://redis:6379/0
       API_BASE_URL: http://host.docker.internal:5201
-      ALLOW_MOCK_TTS: "true"
-      TTS_ENGINE_ORDER: "voxcpm2_modal,voxcpm2_alt,xtts2_modal,mock"
+      # Üretim benzeri: sahte (mock) motor KAPALI. Gerçek motor yoksa bölüm sessizce sinüs sesiyle üretilmek yerine hata verir.
+      ALLOW_MOCK_TTS: "false"
+      TTS_ENGINE_ORDER: "voxcpm2_modal,voxcpm2_alt,xtts2_modal"
     volumes:
       - ./src/SesliKitap.PythonWorker:/app
     extra_hosts:

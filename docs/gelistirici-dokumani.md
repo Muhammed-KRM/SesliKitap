@@ -3719,7 +3719,7 @@ class BaseTtsEngine(ABC):
 - Logda metin yok; `requestId`, parça sayısı, süre, `gpuMs`.
 
 #### `pipeline/tts/mock_engine.py`
-Yerel sahte motor (GPU sunucusu olmadan worker'ın uçtan uca testi): metin uzunluğu × 60 ms sinüs; `family="mock"`. Yalnızca `TTS_ENGINE_ORDER` içinde `mock` açıkça yazılırsa ve `ALLOW_MOCK_TTS=true` ise etkin.
+Yerel sahte motor (GPU sunucusu olmadan worker'ın uçtan uca testi): metin uzunluğu × 60 ms sinüs; `family="mock"`. Yalnızca `TTS_ENGINE_ORDER` içinde `mock` açıkça yazılırsa ve `ALLOW_MOCK_TTS=true` ise etkin. **Üretimde ve geliştirmede `ALLOW_MOCK_TTS=false` olmalıdır** (ADR-006): gerçek motor erişilemezse sahte sesle sessizce üretim yapılmaz, bölüm `TTS_ENGINE_UNAVAILABLE` ile başarısız olur. `mock` çıktısı geniş bantlı gürültüdür (saf ton değil) ve insan sesi değildir.
 
 #### `pipeline/tts/engine_chain.py`
 OtoEdit `STTEngineChain` kalıbı uyarlaması:
@@ -5200,3 +5200,4 @@ tailscale serve --bg --https=443 http://localhost:8080
 |---|---|---|
 | 1.0.0 | 23.10.2026 | İlk sürüm: amaç, kurallar, teknolojiler, mimari, dosya yapısı, fazlar ve test planı |
 | 1.1.0 | 25.10.2026 | Faz 0–9 (`v0.0.0` → `v1.0.0`) geliştirme tamamlandı; ADR-001..005 kararları, `Minio 6.0.3` kısmi okuma uyarlaması, geçici dosya tabanlı asenkron ZIP akışı, `AddBookSearchVector` (`tsvector` + `GIN`), `LogRetentionBackgroundService`, üretim Docker/Nginx yapılandırması ve kapsamlı Faz 9 test sonuçları işlendi |
+| 1.2.0 | 25.10.2026 | Ses kalitesi düzeltmesi (ADR-006): yerel gTTS geri dönüşü kaldırıldı (Google 429 engeli sinüs "vuvuvu" sesine düşürüyordu), üretimde `ALLOW_MOCK_TTS=false` ve `mock` `TTS_ENGINE_ORDER` dışına alındı, `QualityChecker`'a tonal sinyal tespiti (`tonal_signal`) ile `CHUNK_NOT_SPEECH` / `TTS_ENGINE_UNAVAILABLE` hızlı başarısızlık eklendi, `voxcpm==2.0.3` sabitlendi, Modal için temel VoxCPM2 ve `Trendyol/Trendyol-TTS` A/B dağıtımı + `scripts/kur-modal-tts.ps1` / `scripts/ses-karsilastirma.py` |

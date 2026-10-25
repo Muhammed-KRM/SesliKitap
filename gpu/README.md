@@ -8,27 +8,42 @@ Bu dizin, SesliKitap Python Worker'ının HTTP üzerinden çağırdığı durums
 
 ---
 
-## 1. Modal.com Kurulumu (Adım Adım)
+## 1. Modal.com Kurulumu (Önerilen: tek komut)
 
-1. Modal CLI paketini kurun ve hesabınıza giriş yapın:
-   ```powershell
-   pip install modal
-   modal setup
-   ```
-2. TTS sunucusu için paylaşılan Bearer kimlik doğrulama anahtarını oluşturun:
-   ```powershell
-   modal secret create seslikitap-tts-secret TTS_AUTH_TOKEN=<guclu-rastgele-token>
-   ```
-   *(Aynı değeri kök dizindeki `.env` dosyasında `TTS_MODAL_AUTH_TOKEN` değişkenine yazın.)*
-3. VoxCPM2 sunucusunu dağıtın:
-   ```powershell
-   modal deploy gpu/modal_deploy.py
-   ```
-4. Komut çıktısında verilen HTTPS adresini (ör. `https://<kullanici>--seslikitap-tts-voxcpm2-voxcpmserver-web.modal.run`) `.env` dosyasındaki `TTS_MODAL_URL` ve `TTS_MODAL_HEALTH_URL` (`.../v1/health`) alanlarına yapıştırın.
-5. (İsteğe bağlı) Yedek XTTS-v2 sunucusunu dağıtmak için:
-   ```powershell
-   modal deploy gpu/modal_deploy_xtts.py
-   ```
+Ön koşul: [modal.com](https://modal.com) hesabı (GitHub/Google ile ücretsiz açılır; aylık ücretsiz kredi vardır).
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\kur-modal-tts.ps1
+```
+
+Betik sırasıyla: `gpu\.venv` içine Modal CLI kurar → (oturum yoksa) tarayıcıda giriş ister → `.env` içindeki `TTS_API_TOKEN` ile `seslikitap-tts-secret` oluşturur → **iki modeli** dağıtır (`openbmb/VoxCPM2` ve Türkçe LoRA'lı `Trendyol/Trendyol-TTS`) → URL'leri `.env`'e yazar (`TTS_MODAL_URL` = seçili motor, `TTS_MODAL_URL_BASE` / `TTS_MODAL_URL_TRENDYOL` = A/B için) → worker'ı yeniden başlatır → sağlık kontrolü yapar. İlk çalıştırmada imaj oluşturma ve model indirme 5–10 dakika sürebilir. Boştaki GPU 120 sn sonra kapanır (`scaledown_window`), kapalıyken ücret yoktur.
+
+Yalnızca tek model için: `-Model base` veya `-Model trendyol`; aktif motoru seçmek için `-Active trendyol`.
+
+### Kulak testi (A/B)
+
+`referans-ses\ses.wav` + `referans-ses\ses.txt` koyun (bkz. `referans-ses\README.md`), sonra:
+
+```powershell
+src\SesliKitap.PythonWorker\.venv\Scripts\python.exe scripts\ses-karsilastirma.py
+```
+
+Aynı referans, aynı 6 cümle ve aynı tohumla her model için `referans-ses\sonuc\*.wav` üretir; ekranda tonal oran ve RTF (gerçek GPU hızı) yazar. Daha doğal olanı `.env` içindeki `TTS_MODAL_URL` değerine yazın (veya betiği `-Active` ile yeniden çalıştırın).
+
+### Elle kurulum (betik kullanmadan)
+
+```powershell
+pip install modal; modal setup
+modal secret create seslikitap-tts-secret TTS_API_TOKEN=<.env-deki-deger> --force
+cd gpu; modal deploy modal_deploy.py      # temel model
+$env:SK_TTS_MODEL_ID="Trendyol/Trendyol-TTS"; $env:SK_TTS_APP_SUFFIX="trendyol"; modal deploy modal_deploy.py
+```
+
+Komut çıktısındaki `https://...modal.run` adresini `.env` içindeki `TTS_MODAL_URL` ve `TTS_MODAL_HEALTH_URL` (`.../v1/health`) alanlarına yazın.
+
+> **Not:** `requirements.txt` içinde `voxcpm==2.0.3` sabittir; eski sürümler referans sesi sessizce yok sayar ve sunucu bu durumda açılışta hata verir. Yerel mock sunucusu (bölüm 3) yalnızca API sözleşmesi testleri içindir; sinüs benzeri çıktısı worker'ın kalite denetiminde `tonal_signal` olarak reddedilir.
+
+Yedek XTTS-v2 sunucusu (isteğe bağlı): `modal deploy gpu/modal_deploy_xtts.py`
 
 ---
 

@@ -1,6 +1,6 @@
 torch>=2.5.0
 torchaudio>=2.5.0
-voxcpm>=0.1.0
+voxcpm==2.0.3
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
 pydantic>=2.10.0

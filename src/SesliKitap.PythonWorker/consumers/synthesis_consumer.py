@@ -227,6 +227,14 @@ class SynthesisConsumer(BaseConsumer[SynthesisRequestedEvent]):
                         trace_id=trace_id,
                     )
                     stats.failed += 1
+                    if err_code == "TTS_ENGINE_UNAVAILABLE":
+                        # Yapılandırılmış hiçbir motor yok: kalan bölümleri tek tek denemek anlamsız, işi hemen bitir.
+                        logger.error(
+                            "Hiçbir TTS motoru kullanılabilir değil; iş durduruluyor (jobId=%s). "
+                            ".env içindeki TTS_MODAL_URL / TTS_API_TOKEN değerlerini kontrol edin.",
+                            job.job_id,
+                        )
+                        break
                 finally:
                     cleanup_job(chapter_dir)
 
@@ -590,7 +598,8 @@ class SynthesisConsumer(BaseConsumer[SynthesisRequestedEvent]):
         """Partiyi sentezler, kalite kontrolünden geçmeyen parçaları farklı tohumla yeniden dener ve en yüksek puanlı adayı seçer."""
         max_attempts = max(1, settings.tts_quality_max_retries + 1)
         pending: dict[str, Chunk] = {ch.id: ch for ch in batch_chunks}
-        best_candidates: dict[str, tuple[ float, ChunkAudio ]] = {}
+        best_candidates: dict[str, tuple[float, ChunkAudio]] = {}
+        best_reasons: dict[str, list[str]] = {}
         total_gpu_ms = 0
         last_engine_id = ""
 
@@ -635,6 +644,7 @@ class SynthesisConsumer(BaseConsumer[SynthesisRequestedEvent]):
                 prev_best = best_candidates.get(ch_id)
                 if prev_best is None or report.score >= prev_best[0]:
                     best_candidates[ch_id] = (report.score, cand_audio)
+                    best_reasons[ch_id] = list(report.reasons)
 
                 if not report.ok and attempt < max_attempts:
                     next_pending[ch_id] = ch_obj
@@ -647,6 +657,12 @@ class SynthesisConsumer(BaseConsumer[SynthesisRequestedEvent]):
                 raise ChapterFailedError(
                     "CHUNK_SYNTHESIS_FAILED",
                     f"Parça '{ch.id}' tüm denemelere rağmen üretilemedi.",
+                )
+            if "tonal_signal" in best_reasons.get(ch.id, []):
+                # Konuşma yerine saf ton (sinüs/"vuvuvu") üretildi: asla kabul etme, önbelleğe yazma.
+                raise ChapterFailedError(
+                    "CHUNK_NOT_SPEECH",
+                    f"Parça '{ch.id}' için üretilen ses konuşma değil, saf ton (motor: {last_engine_id}).",
                 )
             final_map[ch.id] = best_candidates[ch.id][1]
 

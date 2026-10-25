@@ -1,4 +1,4 @@
-"""SynthesisConsumer ve çapraz dil sözleşme (contract) birim testleri (Bölüm 4.15.8 & Adım 4.7)."""
+﻿"""SynthesisConsumer ve çapraz dil sözleşme (contract) birim testleri (Bölüm 4.15.8 & Adım 4.7)."""
 
 from __future__ import annotations
 
@@ -272,6 +272,74 @@ def test_synthesis_consumer_switches_family_when_pinned_family_exhausted(
     assert fake_publisher.chapter_synthesized_events[0].motor == "mock"
     assert fake_publisher.synthesis_completed_events[0].sonuc == "Tamamlandi"
 
+
+def test_synthesis_consumer_rejects_tonal_engine_output_and_does_not_cache(
+    fake_minio: FakeMinioClient,
+    fake_publisher: FakeRabbitMQPublisher,
+    fake_pipeline_logger: FakePipelineLogger,
+    fake_redis: FakeRedis,
+) -> None:
+    """Regresyon: motor konuşma yerine sinüs üretirse bölüm HATA olmalı; ses önbelleğe yazılmamalı."""
+
+    class SineEngine(MockTtsEngine):
+        engine_id = "mock"
+        family = "mock"
+
+        def synthesize(self, chunks, voice, params, *, request_id="", language="tr"):  # type: ignore[no-untyped-def]
+            res = super().synthesize(chunks, voice, params, request_id=request_id, language=language)
+            for out in res.outputs:
+                n = len(out.samples)
+                t = np.linspace(0.0, n / out.sample_rate, n, endpoint=False, dtype=np.float32)
+                out.samples = (0.35 * np.sin(2.0 * np.pi * 200.0 * t)).astype(np.float32)
+            return res
+
+    req_event = _seed_two_chapter_job(fake_minio, job_id="job-tonal-reject")
+    cache = ChunkCache(minio=fake_minio, redis_client=fake_redis)  # type: ignore[arg-type]
+    consumer = SynthesisConsumer(
+        publisher=fake_publisher,  # type: ignore[arg-type]
+        pipeline_logger=fake_pipeline_logger,  # type: ignore[arg-type]
+        minio_client=fake_minio,  # type: ignore[arg-type]
+        cancel_checker=CancelChecker(redis_client=fake_redis, cache_ttl_sec=0.0),  # type: ignore[arg-type]
+        chunk_cache=cache,
+        chain_factory=lambda order, _fb: TtsEngineChain(
+            engines={"mock": SineEngine(allow_mock=True)}, order=order
+        ),
+    )
+
+    consumer.handle(req_event)
+
+    assert len(fake_publisher.chapter_synthesized_events) == 0
+    assert len(fake_publisher.error_events) == 2
+    assert all(e.hata_kodu == "CHUNK_NOT_SPEECH" for e in fake_publisher.error_events)
+    assert fake_publisher.synthesis_completed_events[0].sonuc == "Hata"
+    assert not any(k.startswith("tts-cache/") for k in fake_minio.objects)
+
+
+def test_synthesis_consumer_stops_job_when_no_engine_is_available(
+    fake_minio: FakeMinioClient,
+    fake_publisher: FakeRabbitMQPublisher,
+    fake_pipeline_logger: FakePipelineLogger,
+    fake_redis: FakeRedis,
+) -> None:
+    """Üretimde mock kapalı ve uzak motor yoksa sessizce sahte ses üretilmez; iş ilk bölümde durur."""
+    req_event = _seed_two_chapter_job(fake_minio, job_id="job-no-engine")
+    consumer = SynthesisConsumer(
+        publisher=fake_publisher,  # type: ignore[arg-type]
+        pipeline_logger=fake_pipeline_logger,  # type: ignore[arg-type]
+        minio_client=fake_minio,  # type: ignore[arg-type]
+        cancel_checker=CancelChecker(redis_client=fake_redis, cache_ttl_sec=0.0),  # type: ignore[arg-type]
+        chunk_cache=ChunkCache(minio=fake_minio, redis_client=fake_redis),  # type: ignore[arg-type]
+        chain_factory=lambda order, _fb: TtsEngineChain(
+            engines={"mock": MockTtsEngine(allow_mock=False)}, order=order
+        ),
+    )
+
+    consumer.handle(req_event)
+
+    assert len(fake_publisher.chapter_synthesized_events) == 0
+    assert len(fake_publisher.error_events) == 1
+    assert fake_publisher.error_events[0].hata_kodu == "TTS_ENGINE_UNAVAILABLE"
+    assert fake_publisher.synthesis_completed_events[0].sonuc == "Hata"
 
 def test_cross_language_contracts_with_dotnet_samples() -> None:
     repo_root = Path(__file__).resolve().parents[3]

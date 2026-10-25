@@ -94,3 +94,7 @@ test-results/
 appsettings.Production.json
 appsettings.Development.json
 docker-compose.override.yml
+
+# Kisisel ses kayitlari (ses klonlama referansi)
+referans-ses/*
+!referans-ses/README.md

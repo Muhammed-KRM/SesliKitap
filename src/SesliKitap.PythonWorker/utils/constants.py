@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from enum import StrEnum
 
@@ -116,3 +116,8 @@ QUALITY_MIN_SPEECH_FRAME_RATIO = 0.25
 QUALITY_CLIPPING_THRESHOLD = 0.999
 QUALITY_MAX_CLIPPING_RATIO = 0.001
 QUALITY_MAX_INTERNAL_SILENCE_SEC = 2.5
+# Tonal (sinüs benzeri) sinyal tespiti: 1 sn'lik pencerelerde en güçlü 6 FFT binine düşen enerji oranı.
+# Ölçüm: gerçek konuşma 0.2-0.5, saf/harmonik sinüs ~0.89 -> eşik 0.75.
+QUALITY_TONAL_WINDOW_SEC = 1.0
+QUALITY_TONAL_TOP_BINS = 6
+QUALITY_TONAL_RATIO_MAX = 0.75
