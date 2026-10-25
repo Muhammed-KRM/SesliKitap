@@ -153,6 +153,11 @@ export class SignalrService {
       await this.rejoinActiveGroups();
     } catch {
       this.status.set('disconnected');
+      setTimeout(() => {
+        if (this.status() === 'disconnected' && this.accessKey.hasKey()) {
+          void this.connect();
+        }
+      }, 3000);
     }
   }
 

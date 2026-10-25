@@ -14,6 +14,6 @@ export class BookmarkService extends ApiBaseService {
   }
 
   delete(bookId: string, bookmarkId: string): Observable<void> {
-    return this.http.delete<void>(this.url(`/books/${bookId}/bookmarks/${bookmarkId}`));
+    return this.http.delete<void>(this.url(`/bookmarks/${bookmarkId}`));
   }
 }

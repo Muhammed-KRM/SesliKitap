@@ -36,6 +36,18 @@ public sealed partial class AudiobookHub : Hub<IAudiobookClient>
         Groups.AddToGroupAsync(Context.ConnectionId, HubGroups.Library);
 
     /// <summary>
+    /// İstemciyi kütüphane bildirim grubuna (<c>library</c>) ekler.
+    /// </summary>
+    public Task JoinLibraryGroup() =>
+        Groups.AddToGroupAsync(Context.ConnectionId, HubGroups.Library);
+
+    /// <summary>
+    /// İstemciyi kütüphane bildirim grubundan çıkarır.
+    /// </summary>
+    public Task LeaveLibraryGroup() =>
+        Groups.RemoveFromGroupAsync(Context.ConnectionId, HubGroups.Library);
+
+    /// <summary>
     /// İstemciyi ses profilleri bildirim grubuna (<c>voices</c>) ekler.
     /// </summary>
     public Task JoinVoices() =>

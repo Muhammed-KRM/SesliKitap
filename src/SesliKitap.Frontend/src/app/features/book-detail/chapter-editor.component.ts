@@ -117,7 +117,7 @@ import { DurationPipe } from '../../shared/pipes/duration.pipe';
                   <div class="mb-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1">
                     <div class="flex items-center justify-between">
                       <span class="font-semibold text-emerald-300">
-                        Telaffuz Önizleme ({{ prev.uygulananKuralSayisi }} kural uygulandı)
+                        Telaffuz Önizleme ({{ prev.degisenKelimeSayisi }} kelime dönüştürüldü)
                       </span>
                       <button
                         type="button"
@@ -127,7 +127,7 @@ import { DurationPipe } from '../../shared/pipes/duration.pipe';
                         ✕
                       </button>
                     </div>
-                    <p class="text-slate-200 line-clamp-4">{{ prev.donusturulmusMetin }}</p>
+                    <p class="text-slate-200 line-clamp-4">{{ prev.onizlemeMetni }}</p>
                   </div>
                 }
 

@@ -290,15 +290,15 @@ export class PlayerPageComponent implements OnInit {
   saveBookmark(bookId: string): void {
     const ch = this.player.chapter();
     if (!ch) return;
-    const note = this.bookmarkNote.trim() || null;
     const sentence = this.player.currentSentence()?.t ?? null;
+    const rawNote = this.bookmarkNote.trim();
+    const note = rawNote || sentence || null;
 
     this.bookmarkService
       .create(bookId, {
         chapterId: ch.id,
         pozisyonSn: Math.round(this.player.position() * 10) / 10,
-        notMetni: note,
-        cumleMetni: sentence
+        not: note
       })
       .subscribe({
         next: (created) => {

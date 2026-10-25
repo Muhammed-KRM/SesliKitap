@@ -117,14 +117,19 @@ public sealed class ApiKeyAuthMiddleware
             return;
         }
 
-        // SignalR WebSocket bağlantıları: /hubs/... ?access_token=...
-        if (path.StartsWith("/hubs/", StringComparison.OrdinalIgnoreCase) &&
-            context.Request.Query.TryGetValue("access_token", out var accessTokenValues) &&
-            ConstantTimeEquals(accessTokenValues.ToString(), expectedApiKey))
+        // SignalR WebSocket ve negotiate bağlantıları: /hubs/... ?access_token=... veya Authorization: Bearer ...
+        if (path.StartsWith("/hubs/", StringComparison.OrdinalIgnoreCase))
         {
-            context.Items[AuthenticatedItemKey] = true;
-            await _next(context);
-            return;
+            var hubToken = context.Request.Query.TryGetValue("access_token", out var accessTokenValues)
+                ? accessTokenValues.ToString()
+                : ExtractBearerToken(context.Request.Headers.Authorization.ToString());
+
+            if (ConstantTimeEquals(hubToken, expectedApiKey))
+            {
+                context.Items[AuthenticatedItemKey] = true;
+                await _next(context);
+                return;
+            }
         }
 
         // Medya akışı yolları: /api/chapters/{id}/audio, /api/books/{id}/cover, /api/voice-profiles/{id}/sample
@@ -197,6 +202,19 @@ public sealed class ApiKeyAuthMiddleware
 
         return CryptographicOperations.FixedTimeEquals(providedHash, expectedHash)
                && provided.Length == expected.Length;
+    }
+
+    private static string? ExtractBearerToken(string? authorizationHeader)
+    {
+        if (string.IsNullOrWhiteSpace(authorizationHeader))
+        {
+            return null;
+        }
+
+        const string bearerPrefix = "Bearer ";
+        return authorizationHeader.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase)
+            ? authorizationHeader[bearerPrefix.Length..].Trim()
+            : null;
     }
 
     private static async Task WriteProblemAsync(

@@ -1,58 +1,67 @@
 export interface PronunciationDto {
   id: string;
-  kaynakIfade: string;
+  kelime: string;
   okunus: string;
-  yalnizcaTamKelime: boolean;
-  buyukKucukHarfDuyarli: boolean;
-  olusturulmaTarihi: string;
+  buyukKucukDuyarli: boolean;
+  aktifMi: boolean;
+  aciklama?: string | null;
+  olusturmaTarihi: string;
 }
 
 export interface PronunciationCreateRequest {
-  kaynakIfade: string;
+  kelime: string;
   okunus: string;
-  yalnizcaTamKelime: boolean;
-  buyukKucukHarfDuyarli: boolean;
+  buyukKucukDuyarli: boolean;
+  aktifMi?: boolean;
+  aciklama?: string | null;
 }
 
 export interface PronunciationPreviewResponse {
-  donusturulmusMetin: string;
-  uygulananKuralSayisi: number;
+  orijinalMetin: string;
+  onizlemeMetni: string;
+  degisenKelimeSayisi: number;
 }
 
 export interface BookmarkDto {
   id: string;
   bookId: string;
   chapterId: string;
-  bolumSiraNo: number;
-  bolumBaslik: string;
+  chapterSiraNo: number;
+  chapterBaslik: string;
   pozisyonSn: number;
-  notMetni: string | null;
-  cumleMetni: string | null;
-  olusturulmaTarihi: string;
+  not: string | null;
+  olusturmaTarihi: string;
 }
 
 export interface BookmarkCreateRequest {
   chapterId: string;
   pozisyonSn: number;
-  notMetni?: string | null;
-  cumleMetni?: string | null;
+  not?: string | null;
 }
 
 export interface MonthlyUsageHistoryItemDto {
-  ay: string;
-  gpuSaat: number;
-  maliyetUsd: number;
+  yil: number;
+  ay: number;
+  donemEtiketi: string;
+  toplamGpuMs: number;
+  toplamMaliyetUsd: number;
+  uretilenSesSaat: number;
+  tamamlananIsSayisi: number;
 }
 
 export interface MonthlyUsageDto {
-  ay: string;
-  toplamGpuSn: number;
+  yil: number;
+  ay: number;
+  toplamGpuMs: number;
   toplamGpuSaat: number;
-  tahminiMaliyetUsd: number;
-  aylikLimitUsd: number;
-  limitAsildiMi: boolean;
+  toplamMaliyetUsd: number;
+  aylikButceUsd: number;
+  butceKullanimYuzdesi: number;
+  uretilenSesSn: number;
+  uretilenSesSaat: number;
+  tamamlananIsSayisi: number;
   seslendirilenKitapSayisi: number;
-  seslendirilenBolumSayisi: number;
-  toplamSesSuresiSn: number;
-  sonAltiAyGecmisi: MonthlyUsageHistoryItemDto[];
+  onbellektenParcaSayisi: number;
+  uretilenParcaSayisi: number;
+  sonAltiAy: MonthlyUsageHistoryItemDto[];
 }

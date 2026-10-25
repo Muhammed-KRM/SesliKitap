@@ -35,29 +35,33 @@ describe('Faz 8 Services (Pronunciation, Bookmark, Usage)', () => {
   it('PronunciationService should list, create and preview rules', () => {
     pronunciationService.getAll().subscribe((list) => {
       expect(list.length).toBe(1);
-      expect(list[0].kaynakIfade).toBe('AI');
+      expect(list[0].kelime).toBe('AI');
     });
 
     const getReq = httpMock.expectOne((r) => r.url.endsWith('/pronunciations') && r.method === 'GET');
     getReq.flush([
       {
         id: '11111111-1111-1111-1111-111111111111',
-        kaynakIfade: 'AI',
+        kelime: 'AI',
         okunus: 'yapay zekâ',
-        yalnizcaTamKelime: true,
-        buyukKucukHarfDuyarli: false,
-        olusturulmaTarihi: '2026-04-01T00:00:00Z'
+        buyukKucukDuyarli: false,
+        aktifMi: true,
+        olusturmaTarihi: '2026-04-01T00:00:00Z'
       }
     ]);
 
     pronunciationService.preview('AI harika').subscribe((res) => {
-      expect(res.donusturulmusMetin).toBe('yapay zekâ harika');
-      expect(res.uygulananKuralSayisi).toBe(1);
+      expect(res.onizlemeMetni).toBe('yapay zekâ harika');
+      expect(res.degisenKelimeSayisi).toBe(1);
     });
 
     const prevReq = httpMock.expectOne((r) => r.url.endsWith('/pronunciations/preview'));
     expect(prevReq.request.method).toBe('POST');
-    prevReq.flush({ donusturulmusMetin: 'yapay zekâ harika', uygulananKuralSayisi: 1 });
+    prevReq.flush({
+      orijinalMetin: 'AI harika',
+      onizlemeMetni: 'yapay zekâ harika',
+      degisenKelimeSayisi: 1
+    });
   });
 
   it('BookmarkService should list, create and delete bookmarks for a book', () => {
@@ -66,7 +70,7 @@ describe('Faz 8 Services (Pronunciation, Bookmark, Usage)', () => {
       .create(bookId, {
         chapterId: '33333333-3333-3333-3333-333333333333',
         pozisyonSn: 42.5,
-        notMetni: 'Önemli not'
+        not: 'Önemli not'
       })
       .subscribe((bm) => {
         expect(bm.pozisyonSn).toBe(42.5);
@@ -78,19 +82,18 @@ describe('Faz 8 Services (Pronunciation, Bookmark, Usage)', () => {
       id: '44444444-4444-4444-4444-444444444444',
       bookId,
       chapterId: '33333333-3333-3333-3333-333333333333',
-      bolumSiraNo: 1,
-      bolumBaslik: 'Bölüm 1',
+      chapterSiraNo: 1,
+      chapterBaslik: 'Bölüm 1',
       pozisyonSn: 42.5,
-      notMetni: 'Önemli not',
-      cumleMetni: null,
-      olusturulmaTarihi: '2026-04-01T00:00:00Z'
+      not: 'Önemli not',
+      olusturmaTarihi: '2026-04-01T00:00:00Z'
     });
   });
 
   it('UsageService should fetch monthly GPU usage report', () => {
     usageService.getMonthlyUsage('2026-04').subscribe((rep) => {
-      expect(rep.ay).toBe('2026-04');
-      expect(rep.sonAltiAyGecmisi.length).toBe(6);
+      expect(rep.yil).toBe(2026);
+      expect(rep.sonAltiAy.length).toBe(6);
     });
 
     const req = httpMock.expectOne(
@@ -98,19 +101,27 @@ describe('Faz 8 Services (Pronunciation, Bookmark, Usage)', () => {
     );
     expect(req.request.method).toBe('GET');
     req.flush({
-      ay: '2026-04',
-      toplamGpuSn: 3600,
+      yil: 2026,
+      ay: 4,
+      toplamGpuMs: 3600000,
       toplamGpuSaat: 1,
-      tahminiMaliyetUsd: 0.8,
-      aylikLimitUsd: 10,
-      limitAsildiMi: false,
+      toplamMaliyetUsd: 0.8,
+      aylikButceUsd: 10,
+      butceKullanimYuzdesi: 8,
+      uretilenSesSn: 7200,
+      uretilenSesSaat: 2,
+      tamamlananIsSayisi: 1,
       seslendirilenKitapSayisi: 1,
-      seslendirilenBolumSayisi: 5,
-      toplamSesSuresiSn: 7200,
-      sonAltiAyGecmisi: Array.from({ length: 6 }, (_, i) => ({
-        ay: `2026-0${i + 1}`,
-        gpuSaat: 1,
-        maliyetUsd: 0.8
+      onbellektenParcaSayisi: 0,
+      uretilenParcaSayisi: 20,
+      sonAltiAy: Array.from({ length: 6 }, (_, i) => ({
+        yil: 2026,
+        ay: i + 1,
+        donemEtiketi: `0${i + 1}/2026`,
+        toplamGpuMs: 3600000,
+        toplamMaliyetUsd: 0.8,
+        uretilenSesSaat: 2,
+        tamamlananIsSayisi: 1
       }))
     });
   });

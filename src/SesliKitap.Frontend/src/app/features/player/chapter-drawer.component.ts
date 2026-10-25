@@ -102,18 +102,13 @@ import { DurationPipe } from '../../shared/pipes/duration.pipe';
                     <div class="min-w-0 flex-1 space-y-1">
                       <div class="flex items-center gap-2">
                         <span class="text-xs font-bold text-brand-400">
-                          #{{ bm.bolumSiraNo }} · {{ bm.pozisyonSn | clock }}
+                          #{{ bm.chapterSiraNo }} · {{ bm.pozisyonSn | clock }}
                         </span>
-                        <span class="text-xs text-slate-400 truncate">{{ bm.bolumBaslik }}</span>
+                        <span class="text-xs text-slate-400 truncate">{{ bm.chapterBaslik }}</span>
                       </div>
-                      @if (bm.notMetni) {
+                      @if (bm.not) {
                         <p class="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                          📝 {{ bm.notMetni }}
-                        </p>
-                      }
-                      @if (bm.cumleMetni) {
-                        <p class="text-[11px] text-slate-400 italic line-clamp-2">
-                          "{{ bm.cumleMetni }}"
+                          📝 {{ bm.not }}
                         </p>
                       }
                     </div>

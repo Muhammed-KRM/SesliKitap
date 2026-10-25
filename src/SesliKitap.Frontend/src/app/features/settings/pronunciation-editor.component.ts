@@ -31,11 +31,11 @@ import { ToastService } from '../../core/services/toast.service';
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
-              Kaynak İfade (örn. AI, Prof., J.R.R.)
+              Kelime / İfade (örn. AI, Prof., J.R.R.)
             </label>
             <input
               type="text"
-              [(ngModel)]="kaynakIfade"
+              [(ngModel)]="kelime"
               placeholder="Kaynak kelime veya kısaltma"
               class="w-full px-3 py-2 rounded-xl bg-white dark:bg-surface-800 border border-slate-300 dark:border-slate-700 text-sm"
             />
@@ -58,18 +58,18 @@ import { ToastService } from '../../core/services/toast.service';
             <label class="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="checkbox"
-                [(ngModel)]="yalnizcaTamKelime"
+                [(ngModel)]="buyukKucukDuyarli"
                 class="rounded accent-brand-500"
               />
-              <span>Yalnızca tam kelime eşleşmesi</span>
+              <span>Büyük/küçük harf duyarlı</span>
             </label>
             <label class="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="checkbox"
-                [(ngModel)]="buyukKucukHarfDuyarli"
+                [(ngModel)]="aktifMi"
                 class="rounded accent-brand-500"
               />
-              <span>Büyük/küçük harf duyarlı</span>
+              <span>Aktif</span>
             </label>
           </div>
 
@@ -100,7 +100,7 @@ import { ToastService } from '../../core/services/toast.service';
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-50 dark:bg-surface-900 text-slate-400">
               <tr>
-                <th class="px-3.5 py-2.5 font-semibold">Kaynak İfade</th>
+                <th class="px-3.5 py-2.5 font-semibold">Kelime</th>
                 <th class="px-3.5 py-2.5 font-semibold">Okunuş</th>
                 <th class="px-3.5 py-2.5 font-semibold">Eşleşme</th>
                 <th class="px-3.5 py-2.5 font-semibold text-right">İşlem</th>
@@ -110,14 +110,14 @@ import { ToastService } from '../../core/services/toast.service';
               @for (item of entries(); track item.id) {
                 <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                   <td class="px-3.5 py-2.5 font-mono font-semibold text-slate-900 dark:text-slate-100">
-                    {{ item.kaynakIfade }}
+                    {{ item.kelime }}
                   </td>
                   <td class="px-3.5 py-2.5 text-emerald-400 font-medium">
                     {{ item.okunus }}
                   </td>
                   <td class="px-3.5 py-2.5 text-slate-400">
-                    {{ item.yalnizcaTamKelime ? 'Tam kelime' : 'Alt dizge' }} ·
-                    {{ item.buyukKucukHarfDuyarli ? 'Harf duyarlı' : 'Duyarsız' }}
+                    {{ item.buyukKucukDuyarli ? 'Harf duyarlı' : 'Duyarsız' }} ·
+                    {{ item.aktifMi ? 'Aktif' : 'Pasif' }}
                   </td>
                   <td class="px-3.5 py-2.5 text-right space-x-2">
                     <button
@@ -166,9 +166,9 @@ import { ToastService } from '../../core/services/toast.service';
         </div>
         @if (previewResult(); as prev) {
           <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1">
-            <p class="text-emerald-300 font-medium">{{ prev.donusturulmusMetin }}</p>
+            <p class="text-emerald-300 font-medium">{{ prev.onizlemeMetni }}</p>
             <p class="text-[11px] text-slate-400">
-              Uygulanan kural sayısı: {{ prev.uygulananKuralSayisi }}
+              Değişen kelime sayısı: {{ prev.degisenKelimeSayisi }}
             </p>
           </div>
         }
@@ -184,10 +184,10 @@ export class PronunciationEditorComponent implements OnInit {
   readonly editingId = signal<string | null>(null);
   readonly previewResult = signal<PronunciationPreviewResponse | null>(null);
 
-  kaynakIfade = '';
+  kelime = '';
   okunus = '';
-  yalnizcaTamKelime = true;
-  buyukKucukHarfDuyarli = false;
+  buyukKucukDuyarli = false;
+  aktifMi = true;
   previewInput = '';
 
   ngOnInit(): void {
@@ -201,18 +201,18 @@ export class PronunciationEditorComponent implements OnInit {
   }
 
   saveRule(): void {
-    const src = this.kaynakIfade.trim();
+    const src = this.kelime.trim();
     const dst = this.okunus.trim();
     if (!src || !dst) {
-      this.toast.warning('Kaynak ifade ve okunuş alanları zorunludur.');
+      this.toast.warning('Kelime ve okunuş alanları zorunludur.');
       return;
     }
 
     const req = {
-      kaynakIfade: src,
+      kelime: src,
       okunus: dst,
-      yalnizcaTamKelime: this.yalnizcaTamKelime,
-      buyukKucukHarfDuyarli: this.buyukKucukHarfDuyarli
+      buyukKucukDuyarli: this.buyukKucukDuyarli,
+      aktifMi: this.aktifMi
     };
 
     const editId = this.editingId();
@@ -237,18 +237,18 @@ export class PronunciationEditorComponent implements OnInit {
 
   startEdit(item: PronunciationDto): void {
     this.editingId.set(item.id);
-    this.kaynakIfade = item.kaynakIfade;
+    this.kelime = item.kelime;
     this.okunus = item.okunus;
-    this.yalnizcaTamKelime = item.yalnizcaTamKelime;
-    this.buyukKucukHarfDuyarli = item.buyukKucukHarfDuyarli;
+    this.buyukKucukDuyarli = item.buyukKucukDuyarli;
+    this.aktifMi = item.aktifMi;
   }
 
   resetForm(): void {
     this.editingId.set(null);
-    this.kaynakIfade = '';
+    this.kelime = '';
     this.okunus = '';
-    this.yalnizcaTamKelime = true;
-    this.buyukKucukHarfDuyarli = false;
+    this.buyukKucukDuyarli = false;
+    this.aktifMi = true;
   }
 
   deleteRule(id: string): void {
