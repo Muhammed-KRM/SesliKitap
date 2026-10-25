@@ -45,8 +45,6 @@ class ReferencePreparer:
             try:
                 af_chain = (
                     "highpass=f=70,"
-                    "silenceremove=start_periods=1:start_threshold=-45dB:"
-                    "stop_periods=1:stop_threshold=-45dB:stop_duration=0.4,"
                     "loudnorm=I=-20:TP=-1.5:LRA=11"
                 )
                 self._ffmpeg.run(
@@ -96,7 +94,7 @@ class ReferencePreparer:
             sr = TARGET_SAMPLE_RATE
 
         # Baş/son sessizlik kırpma (-45 dBFS ≈ 0.0056 genlik)
-        if not ffmpeg_ok and arr.size > 0:
+        if arr.size > 0:
             threshold = 10.0 ** (-45.0 / 20.0)
             active = np.flatnonzero(np.abs(arr) > threshold)
             if active.size > 0:

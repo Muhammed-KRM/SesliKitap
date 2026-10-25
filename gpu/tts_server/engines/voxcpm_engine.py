@@ -45,6 +45,8 @@ class VoxCpmEngine(BaseTtsServerEngine):
         from_pretrained_sig = inspect.signature(VoxCPM.from_pretrained)
         if "device" in from_pretrained_sig.parameters:
             load_kwargs["device"] = self.device
+        if "optimize" in from_pretrained_sig.parameters:
+            load_kwargs["optimize"] = False
         if self.cache_dir is not None and "cache_dir" in from_pretrained_sig.parameters:
             load_kwargs["cache_dir"] = str(self.cache_dir)
 
@@ -52,23 +54,23 @@ class VoxCpmEngine(BaseTtsServerEngine):
         tts_inner = getattr(self._model, "tts_model", self._model)
         self.sample_rate = int(getattr(tts_inner, "sample_rate", 48000))
         self._supported_params = set(inspect.signature(self._model.generate).parameters.keys())
-        if not ({"reference_wav_path", "prompt_wav_path"} & self._supported_params):
-            # Eski voxcpm (<2.0) sürümleri referans sesi hata vermeden yok sayıp klonsuz üretir.
+        has_kwargs = "kwargs" in self._supported_params
+        if not (has_kwargs or ({"reference_wav_path", "prompt_wav_path"} & self._supported_params)):
             raise RuntimeError(
-                "Yüklü voxcpm sürümü ses klonlamayı desteklemiyor "
-                "(generate() içinde reference_wav_path/prompt_wav_path yok). voxcpm>=2.0 gerekli."
+                "Yüklü voxcpm sürümü ses klonlamayı desteklemiyor. voxcpm>=2.0 gerekli."
             )
         self.is_loaded = True
         logger.info(
-            "VoxCPM2 modeli yüklendi: sample_rate=%d, params=%s",
+            "VoxCPM2 modeli yüklendi: sample_rate=%d, params=%s, has_kwargs=%s",
             self.sample_rate,
             sorted(self._supported_params),
+            has_kwargs,
         )
 
     def generate(
         self,
         text: str,
-        voice: VoiceEntry,
+        voice: VoiceEntry | None,
         params: SynthesizeParams,
         language: str = "tr",
         seed: int | None = None,
@@ -86,31 +88,33 @@ class VoxCpmEngine(BaseTtsServerEngine):
             except (ImportError, RuntimeError):
                 logger.debug("Torch seed ayarlanamadı.")
 
+        has_kwargs = "kwargs" in self._supported_params
         kwargs: dict[str, Any] = {"text": text}
-        if "cfg_value" in self._supported_params:
+        if has_kwargs or "cfg_value" in self._supported_params:
             kwargs["cfg_value"] = float(params.cfg_value)
-        if "inference_timesteps" in self._supported_params:
+        if has_kwargs or "inference_timesteps" in self._supported_params:
             kwargs["inference_timesteps"] = int(params.inference_timesteps)
-        if "normalize" in self._supported_params:
+        if has_kwargs or "normalize" in self._supported_params:
             kwargs["normalize"] = bool(params.normalize_text)
-        if "denoise" in self._supported_params:
+        if has_kwargs or "denoise" in self._supported_params:
             kwargs["denoise"] = bool(params.denoise_prompt)
 
-        wav_str = str(voice.wav_path)
-        has_prompt_text = bool(voice.prompt_text and voice.prompt_text.strip())
+        if voice is not None and voice.wav_path and Path(voice.wav_path).is_file():
+            wav_str = str(voice.wav_path)
+            has_prompt_text = bool(voice.prompt_text and voice.prompt_text.strip())
 
-        if has_prompt_text:
-            if "prompt_wav_path" in self._supported_params:
-                kwargs["prompt_wav_path"] = wav_str
-            if "prompt_text" in self._supported_params:
-                kwargs["prompt_text"] = voice.prompt_text
-            if "reference_wav_path" in self._supported_params:
-                kwargs["reference_wav_path"] = wav_str
-        else:
-            if "reference_wav_path" in self._supported_params:
-                kwargs["reference_wav_path"] = wav_str
-            elif "prompt_wav_path" in self._supported_params:
-                kwargs["prompt_wav_path"] = wav_str
+            if has_prompt_text:
+                if has_kwargs or "prompt_wav_path" in self._supported_params:
+                    kwargs["prompt_wav_path"] = wav_str
+                if has_kwargs or "prompt_text" in self._supported_params:
+                    kwargs["prompt_text"] = voice.prompt_text
+                if not has_kwargs and "reference_wav_path" in self._supported_params:
+                    kwargs["reference_wav_path"] = wav_str
+            else:
+                if has_kwargs or "prompt_wav_path" in self._supported_params:
+                    kwargs["prompt_wav_path"] = wav_str
+                elif "reference_wav_path" in self._supported_params:
+                    kwargs["reference_wav_path"] = wav_str
 
         wav = self._model.generate(**kwargs)
         arr = np.asarray(wav, dtype=np.float32)

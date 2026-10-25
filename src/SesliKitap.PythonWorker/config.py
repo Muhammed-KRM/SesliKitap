@@ -112,8 +112,8 @@ class Config(BaseSettings):
         default=2,
         validation_alias=AliasChoices("TTS_QUALITY_MAX_RETRIES", "tts_quality_max_retries"),
     )
-    tts_max_chunk_chars: int = Field(default=280, validation_alias=AliasChoices("TTS_MAX_CHUNK_CHARS", "tts_max_chunk_chars"))
-    tts_min_chunk_chars: int = Field(default=25, validation_alias=AliasChoices("TTS_MIN_CHUNK_CHARS", "tts_min_chunk_chars"))
+    tts_max_chunk_chars: int = Field(default=480, validation_alias=AliasChoices("TTS_MAX_CHUNK_CHARS", "tts_max_chunk_chars"))
+    tts_min_chunk_chars: int = Field(default=70, validation_alias=AliasChoices("TTS_MIN_CHUNK_CHARS", "tts_min_chunk_chars"))
     tts_transfer_sample_rate: int = 24000
     output_sample_rate: int = 48000
     max_download_bytes: int = 300 * 1024 * 1024

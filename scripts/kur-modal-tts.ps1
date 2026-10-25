@@ -13,6 +13,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 $envFile = Join-Path $root ".env"
@@ -67,7 +71,13 @@ function Deploy-Model([string]$modelId, [string]$suffix) {
         $env:SK_TTS_MODEL_ID = $modelId
         $env:SK_TTS_APP_SUFFIX = $suffix
         Write-Host "      Dagitiliyor: $modelId (ilk seferde imaj olusturma birkac dakika surer)..." -ForegroundColor Cyan
-        $out = & $modal deploy modal_deploy.py 2>&1 | Tee-Object -Variable log | ForEach-Object { "$_" }
+        $prevEAP = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        $out = & cmd.exe /c "`"$modal`" deploy modal_deploy.py 2>&1"
+        $ErrorActionPreference = $prevEAP
+        if ($LASTEXITCODE -ne 0) {
+            throw "Modal deploy basarisiz oldu (exit code $LASTEXITCODE):`n$($out -join "`n")"
+        }
         $match = ($out | Select-String -Pattern "https://[^\s]+\.modal\.run" -AllMatches).Matches | Select-Object -Last 1
         if (-not $match) { throw "Dagitim ciktisinda URL bulunamadi:`n$($out -join "`n")" }
         return $match.Value.TrimEnd("/")

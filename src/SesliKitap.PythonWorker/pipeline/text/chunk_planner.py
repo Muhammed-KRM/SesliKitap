@@ -10,7 +10,7 @@ from models.synthesis_models import Chunk, Sentence
 class ChunkPlanner:
     """Normalize edilmiş cümleleri TTS parçalarına dönüştürür; zaman damgası eşlemesini korur."""
 
-    def __init__(self, max_chars: int = 280, min_chars: int = 25) -> None:
+    def __init__(self, max_chars: int = 480, min_chars: int = 70) -> None:
         if max_chars < 50:
             raise ValueError("max_chars en az 50 olmalıdır.")
         if min_chars < 1 or min_chars >= max_chars:

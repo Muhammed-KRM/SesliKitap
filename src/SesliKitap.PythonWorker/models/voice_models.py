@@ -34,7 +34,7 @@ class VoiceParams:
     """TTS sentez parametreleri."""
 
     cfg_value: float = 2.0
-    inference_timesteps: int = 10
+    inference_timesteps: int = 8
     konusma_hizi: float = 1.0
     seed: int | None = None
 
