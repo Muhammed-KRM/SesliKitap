@@ -95,6 +95,10 @@ appsettings.Production.json
 appsettings.Development.json
 docker-compose.override.yml
 
-# Kisisel ses kayitlari (ses klonlama referansi)
+# Kisisel ses kayitlari (kullanicinin ozel sesleri haric, hazir ses paketleri dahil)
 referans-ses/*
 !referans-ses/README.md
+!referans-ses/hazir_sesler/
+!referans-ses/hazir_sesler/**
+!referans-ses/ses.wav
+!referans-ses/ses.txt

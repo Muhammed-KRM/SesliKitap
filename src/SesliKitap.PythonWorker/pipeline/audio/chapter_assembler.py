@@ -21,11 +21,11 @@ from models.synthesis_models import (
 class PauseSettings:
     """Bölüm birleştirme duraklama süreleri (milisaniye)."""
 
-    cumle_arasi_ms: int = 420
-    paragraf_arasi_ms: int = 950
-    baslik_sonrasi_ms: int = 1400
-    diyalog_ms: int = 320
-    alt_parca_arasi_ms: int = 120
+    cumle_arasi_ms: int = 0
+    paragraf_arasi_ms: int = 100
+    baslik_sonrasi_ms: int = 400
+    diyalog_ms: int = 50
+    alt_parca_arasi_ms: int = 0
 
     @classmethod
     def from_input_settings(cls, s: SynthesisInputSettingsModel) -> PauseSettings:

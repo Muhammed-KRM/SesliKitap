@@ -438,13 +438,18 @@ export class SynthesisPanelComponent implements OnInit {
         : null;
     const sadeceEksikler = currentScope === 'missing';
 
+    const cumleArasiMs = Number(localStorage.getItem('sk_synthesis_cumle_arasi_ms') ?? '0');
+    const paragrafArasiMs = Number(localStorage.getItem('sk_synthesis_paragraf_arasi_ms') ?? '100');
+
     this.starting.set(true);
     this.synthesisService
       .start(this.bookId(), {
         voiceProfileId: voiceId,
         chapterIds,
         sadeceEksikler,
-        force: this.forceApproved
+        force: this.forceApproved,
+        cumleArasiMs,
+        paragrafArasiMs
       })
       .subscribe({
         next: (job) => {

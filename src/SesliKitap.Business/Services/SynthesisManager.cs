@@ -226,8 +226,8 @@ public sealed class SynthesisManager : ISynthesisService
 
         var jobSettings = new SynthesisJobSettings
         {
-            CumleArasiMs = _defaultsOptions.CumleArasiMs,
-            ParagrafArasiMs = _defaultsOptions.ParagrafArasiMs,
+            CumleArasiMs = request.CumleArasiMs ?? _defaultsOptions.CumleArasiMs,
+            ParagrafArasiMs = request.ParagrafArasiMs ?? _defaultsOptions.ParagrafArasiMs,
             BaslikSonrasiMs = _defaultsOptions.BaslikSonrasiMs,
             DiyalogMs = _defaultsOptions.DiyalogMs,
             BolumBasligiOku = _defaultsOptions.BolumBasligiOku,

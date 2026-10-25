@@ -91,80 +91,48 @@ class ChunkPlanner:
                 i += 1
                 continue
 
-            # Kural 2: Kısa cümle (< min_chars) -> aynı paragraftaki sonraki cümle(ler)le birleştir
-            if len(spoken) < self.min_chars and (i + 1 < total):
-                next_s = valid_sentences[i + 1]
-                if (
-                    not next_s.is_heading
-                    and next_s.paragraph == curr.paragraph
-                    and len(spoken) + 1 + len(next_s.spoken.strip()) <= self.max_chars
-                ):
-                    group: list[Sentence] = [curr]
-                    combined_text = spoken
-                    j = i + 1
-                    while (
-                        j < total
-                        and len(combined_text) < self.min_chars
-                        and not valid_sentences[j].is_heading
-                        and valid_sentences[j].paragraph == curr.paragraph
-                    ):
-                        cand = valid_sentences[j]
-                        cand_text = cand.spoken.strip()
-                        if len(combined_text) + 1 + len(cand_text) > self.max_chars:
-                            break
-                        group.append(cand)
-                        combined_text = f"{combined_text} {cand_text}"
-                        j += 1
+            # Kural 1 & 2: Aynı paragraftaki ardışık cümleleri max_chars sınırına kadar birleştir
+            group: list[Sentence] = [curr]
+            combined_text = spoken
+            j = i + 1
 
-                    if len(group) > 1:
-                        char_lengths = [max(1, len(s.spoken.strip())) for s in group]
-                        sum_chars = sum(char_lengths)
-                        weights: list[tuple[int, float]] = []
-                        acc = 0.0
-                        for g_idx, g_sent in enumerate(group):
-                            if g_idx == len(group) - 1:
-                                w = round(max(0.0001, 1.0 - acc), 6)
-                            else:
-                                w = round(char_lengths[g_idx] / sum_chars, 6)
-                                acc += w
-                            weights.append((g_sent.index, w))
+            while (
+                j < total
+                and not valid_sentences[j].is_heading
+                and valid_sentences[j].paragraph == curr.paragraph
+                and (len(combined_text) + 1 + len(valid_sentences[j].spoken.strip()) <= self.max_chars)
+            ):
+                cand = valid_sentences[j]
+                cand_text = cand.spoken.strip()
+                group.append(cand)
+                combined_text = f"{combined_text} {cand_text}"
+                j += 1
 
-                        last_in_group = group[-1]
-                        is_para_end = (j >= total) or (valid_sentences[j].paragraph != last_in_group.paragraph)
-                        is_diag_trans = (
-                            (j < total)
-                            and (valid_sentences[j].paragraph == last_in_group.paragraph)
-                            and (valid_sentences[j].is_dialogue != last_in_group.is_dialogue)
-                        )
+            char_lengths = [max(1, len(s.spoken.strip())) for s in group]
+            sum_chars = sum(char_lengths)
+            weights: list[tuple[int, float]] = []
+            acc = 0.0
+            for g_idx, g_sent in enumerate(group):
+                if g_idx == len(group) - 1:
+                    w = round(max(0.0001, 1.0 - acc), 6)
+                else:
+                    w = round(char_lengths[g_idx] / sum_chars, 6)
+                    acc += w
+                weights.append((g_sent.index, w))
 
-                        chunks.append(
-                            Chunk(
-                                id=f"c-{chapter_short}-{chunk_counter:05d}",
-                                text=combined_text,
-                                sentence_weights=weights,
-                                paragraph=curr.paragraph,
-                                is_paragraph_end=is_para_end,
-                                is_heading=False,
-                                is_dialogue_transition=is_diag_trans,
-                                is_subchunk=False,
-                            )
-                        )
-                        chunk_counter += 1
-                        i = j
-                        continue
-
-            # Kural 1: Varsayılan 1 cümle = 1 parça
-            is_para_end = (i + 1 >= total) or (valid_sentences[i + 1].paragraph != curr.paragraph)
+            last_in_group = group[-1]
+            is_para_end = (j >= total) or (valid_sentences[j].paragraph != last_in_group.paragraph)
             is_diag_trans = (
-                (i + 1 < total)
-                and (valid_sentences[i + 1].paragraph == curr.paragraph)
-                and (valid_sentences[i + 1].is_dialogue != curr.is_dialogue)
+                (j < total)
+                and (valid_sentences[j].paragraph == last_in_group.paragraph)
+                and (valid_sentences[j].is_dialogue != last_in_group.is_dialogue)
             )
+
             chunks.append(
                 Chunk(
                     id=f"c-{chapter_short}-{chunk_counter:05d}",
-                    text=spoken,
-                    sentence_weights=[(curr.index, 1.0)],
+                    text=combined_text,
+                    sentence_weights=weights,
                     paragraph=curr.paragraph,
                     is_paragraph_end=is_para_end,
                     is_heading=False,
@@ -173,7 +141,8 @@ class ChunkPlanner:
                 )
             )
             chunk_counter += 1
-            i += 1
+            i = j
+            continue
 
         return chunks
 

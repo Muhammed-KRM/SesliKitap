@@ -128,6 +128,73 @@ import { UsagePanelComponent } from './usage-panel.component';
         </div>
       </section>
 
+      <!-- Seslendirme ve Duraklama Ayarları -->
+      <section
+        class="rounded-2xl bg-white dark:bg-surface-800 border border-slate-200 dark:border-slate-800 p-6 space-y-5"
+      >
+        <div>
+          <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">
+            Seslendirme Akıcılık ve Duraklama Tercihleri
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Bölümler birleştirilirken cümle ve paragraflar arasına eklenecek bekleme sürelerini belirleyin.
+            Duraksamasız, tiyatro akışı gibi kesintisiz okuma için 0 ms önerilir.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Cümle Arası Duraklama
+              </label>
+              <span class="text-xs font-bold text-brand-500">{{ cumleArasiMs }} ms</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="500"
+              step="25"
+              [(ngModel)]="cumleArasiMs"
+              class="w-full accent-brand-500 mt-1"
+            />
+            <p class="text-[11px] text-slate-400 mt-1">
+              0 ms yapıldığında cümleler hiç duraksamadan birbirine bağlanır.
+            </p>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Paragraf Arası Duraklama
+              </label>
+              <span class="text-xs font-bold text-brand-500">{{ paragrafArasiMs }} ms</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1500"
+              step="50"
+              [(ngModel)]="paragrafArasiMs"
+              class="w-full accent-brand-500 mt-1"
+            />
+            <p class="text-[11px] text-slate-400 mt-1">
+              Paragraf sonlarında nefes alma payı bırakır (varsayılan: 100 ms).
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button
+            type="button"
+            (click)="savePauseSettings()"
+            class="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-950 text-xs font-bold transition shadow-sm"
+          >
+            Duraklama Ayarlarını Kaydet
+          </button>
+        </div>
+      </section>
+
       <!-- Çevrimdışı Depolama -->
       <section
         class="rounded-2xl bg-white dark:bg-surface-800 border border-slate-200 dark:border-slate-800 p-6 flex flex-wrap items-center justify-between gap-4"
@@ -228,6 +295,8 @@ export class SettingsPageComponent implements OnInit {
 
   readonly t = T;
   deviceNameInput = this.device.deviceName();
+  cumleArasiMs = Number(localStorage.getItem('sk_synthesis_cumle_arasi_ms') ?? '0');
+  paragrafArasiMs = Number(localStorage.getItem('sk_synthesis_paragraf_arasi_ms') ?? '100');
   readonly healthReport = signal<Record<string, unknown> | null>(null);
   readonly usedBytes = signal(0);
   readonly quotaBytes = signal(0);
@@ -251,6 +320,12 @@ export class SettingsPageComponent implements OnInit {
   saveDeviceName(): void {
     this.device.setDeviceName(this.deviceNameInput);
     this.toast.success('Cihaz adı kaydedildi.');
+  }
+
+  savePauseSettings(): void {
+    localStorage.setItem('sk_synthesis_cumle_arasi_ms', String(this.cumleArasiMs));
+    localStorage.setItem('sk_synthesis_paragraf_arasi_ms', String(this.paragrafArasiMs));
+    this.toast.success('Seslendirme duraklama ayarları kaydedildi.');
   }
 
   async clearOfflineStorage(): Promise<void> {

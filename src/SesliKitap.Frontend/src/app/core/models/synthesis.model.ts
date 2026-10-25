@@ -29,6 +29,8 @@ export interface SynthesisStartRequest {
   chapterIds?: string[] | null;
   sadeceEksikler: boolean;
   force: boolean;
+  cumleArasiMs?: number;
+  paragrafArasiMs?: number;
 }
 
 export interface SynthesisJobDto {

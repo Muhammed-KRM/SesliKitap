@@ -11,20 +11,20 @@ public sealed class SynthesisDefaultsOptions
     public const string SectionName = "SynthesisDefaults";
 
     /// <summary>Cümleler arası duraklama süresi (milisaniye).</summary>
-    [Range(50, 2000)]
-    public int CumleArasiMs { get; init; } = 300;
+    [Range(0, 2000)]
+    public int CumleArasiMs { get; init; } = 0;
 
     /// <summary>Paragraflar arası duraklama süresi (milisaniye).</summary>
-    [Range(100, 4000)]
-    public int ParagrafArasiMs { get; init; } = 700;
+    [Range(0, 4000)]
+    public int ParagrafArasiMs { get; init; } = 100;
 
     /// <summary>Bölüm başlığı okunduktan sonraki duraklama süresi (milisaniye).</summary>
-    [Range(200, 5000)]
-    public int BaslikSonrasiMs { get; init; } = 1200;
+    [Range(0, 5000)]
+    public int BaslikSonrasiMs { get; init; } = 400;
 
     /// <summary>Diyalog geçişlerindeki duraklama süresi (milisaniye).</summary>
-    [Range(50, 2000)]
-    public int DiyalogMs { get; init; } = 400;
+    [Range(0, 2000)]
+    public int DiyalogMs { get; init; } = 50;
 
     /// <summary>Bölüm başlığının seslendirmeye dahil edilip edilmeyeceği.</summary>
     public bool BolumBasligiOku { get; init; } = true;

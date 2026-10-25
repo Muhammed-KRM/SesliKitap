@@ -55,10 +55,10 @@ class SynthesisInputVoiceProfileModel(CamelModel):
 class SynthesisInputSettingsModel(CamelModel):
     """input.json içindeki duraklama ve ses kodlama ayarları."""
 
-    cumle_arasi_ms: int = 420
-    paragraf_arasi_ms: int = 950
-    baslik_sonrasi_ms: int = 1400
-    diyalog_ms: int = 320
+    cumle_arasi_ms: int = 0
+    paragraf_arasi_ms: int = 100
+    baslik_sonrasi_ms: int = 400
+    diyalog_ms: int = 50
     bolum_basligi_oku: bool = True
     opus_bitrate_kbps: int = 48
     mp3_bitrate_kbps: int = 64
