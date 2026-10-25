@@ -172,7 +172,7 @@ def build_default_engine_chain(
             cold_start_timeout_sec=c.tts_cold_start_timeout_sec,
             max_retries=c.tts_max_retries,
         ),
-        "mock": MockTtsEngine(allow_mock=c.allow_mock_tts),
+        "mock": MockTtsEngine(allow_mock=c.allow_mock_tts, use_speech=True),
     }
 
     order = list(order_override) if order_override else list(c.tts_engine_order)

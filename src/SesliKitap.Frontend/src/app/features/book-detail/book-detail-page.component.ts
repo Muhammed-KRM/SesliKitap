@@ -356,7 +356,13 @@ export class BookDetailPageComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((msg) => {
         if (msg.bookId === this.id()) {
-          this.toast.success(`${msg.siraNo}. Bölüm hazır: ${msg.baslik}`, undefined, {
+          const ch = this.book()?.bolumler.find((c) => c.id === msg.chapterId);
+          const siraLabel = msg.siraNo ?? ch?.siraNo;
+          const baslikLabel = msg.baslik ?? ch?.baslik ?? 'Bölüm';
+          const toastText = siraLabel
+            ? `${siraLabel}. Bölüm hazır: ${baslikLabel}`
+            : `Bölüm hazır: ${baslikLabel}`;
+          this.toast.success(toastText, undefined, {
             label: 'Dinle',
             callback: () => {
               void this.router.navigate(['/dinle', this.id()], {
@@ -380,7 +386,7 @@ export class BookDetailPageComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((msg) => {
         if (msg.bookId === this.id()) {
-          if (msg.basariliMi) {
+          if (msg.basarili ?? msg.basariliMi) {
             this.toast.success('M4B sesli kitap dosyası hazır!', undefined, {
               label: 'İndir',
               callback: () => {

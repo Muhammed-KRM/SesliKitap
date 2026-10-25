@@ -162,10 +162,10 @@ export type SynthesisScope = 'missing' | 'all' | 'selected';
               <div class="flex justify-between text-xs text-slate-400">
                 <span>{{ liveProgress()?.mesaj || job.mesaj || 'Seslendiriliyor...' }}</span>
                 <span class="font-bold text-brand-400">
-                  %{{ liveProgress()?.genelYuzde ?? job.yuzde }}
+                  %{{ liveProgress()?.yuzde ?? liveProgress()?.genelYuzde ?? job.yuzde }}
                 </span>
               </div>
-              <app-progress-bar [value]="liveProgress()?.genelYuzde ?? job.yuzde" />
+              <app-progress-bar [value]="liveProgress()?.yuzde ?? liveProgress()?.genelYuzde ?? job.yuzde" />
             </div>
 
             @if (liveProgress(); as lp) {

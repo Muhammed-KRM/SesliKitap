@@ -24,10 +24,13 @@ export interface SynthesisProgressMsg {
   jobId: string;
   bookId: string;
   chapterId: string | null;
-  bolumSiraNo: number | null;
-  asama: string;
-  genelYuzde: number;
+  bolumSiraNo?: number | null;
+  asama?: string;
+  yuzde?: number;
+  genelYuzde?: number;
   bolumYuzde: number;
+  tamamlananBolum?: number;
+  toplamBolum?: number;
   mesaj: string;
 }
 
@@ -35,22 +38,26 @@ export interface ChapterReadyMsg {
   jobId: string;
   bookId: string;
   chapterId: string;
-  siraNo: number;
-  baslik: string;
+  siraNo?: number;
+  baslik?: string;
   sureSn: number;
+  motor?: string;
 }
 
 export interface SynthesisFinishedMsg {
   jobId: string;
   bookId: string;
-  durum: SentezIsDurumu;
+  durum?: SentezIsDurumu;
+  sonuc?: string;
   tamamlananBolum: number;
   hataliBolum: number;
+  maliyetUsd?: number;
 }
 
 export interface VoiceProfileReadyMsg {
   voiceProfileId: string;
-  durum: SesProfiliDurumu;
+  durum?: SesProfiliDurumu;
+  basarili?: boolean;
   hataMesaji?: string | null;
 }
 
@@ -58,9 +65,12 @@ export interface PipelineErrorMsg {
   bookId?: string | null;
   jobId?: string | null;
   chapterId?: string | null;
+  voiceProfileId?: string | null;
   asama: string;
-  hataKodu: string;
-  kullaniciMesaji: string;
+  hataKodu?: string;
+  hataMesaji?: string;
+  kullaniciMesaji?: string;
+  kurtarilabilir?: boolean;
 }
 
 export interface ProgressUpdatedMsg {
@@ -77,8 +87,10 @@ export interface ProgressUpdatedMsg {
 export interface ExportReadyMsg {
   bookId: string;
   format: string;
-  dosyaBoyutu: number;
-  basariliMi: boolean;
+  boyut?: number;
+  dosyaBoyutu?: number;
+  basarili?: boolean;
+  basariliMi?: boolean;
   hataMesaji?: string | null;
 }
 
@@ -276,6 +288,10 @@ export class SignalrService {
     });
 
     conn.on('SynthesisFinished', (msg: SynthesisFinishedMsg) => {
+      this.synthesisFinished$.next(msg);
+    });
+
+    conn.on('SynthesisCompleted', (msg: SynthesisFinishedMsg) => {
       this.synthesisFinished$.next(msg);
     });
 
