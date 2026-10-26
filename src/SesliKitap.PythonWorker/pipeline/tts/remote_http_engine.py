@@ -57,14 +57,61 @@ class RemoteHttpTtsEngine(BaseTtsEngine):
         if self._client is None:
             self._client = httpx.Client(
                 timeout=httpx.Timeout(
-                    connect=10.0,
+                    connect=15.0,
                     read=float(self._request_timeout_sec),
                     write=60.0,
                     pool=10.0,
                 ),
                 headers={"Authorization": f"Bearer {self._api_token}"},
+                follow_redirects=True,
             )
         return self._client
+
+    def _post_json(self, client: httpx.Client, initial_url: str, body: dict) -> httpx.Response:
+        url = initial_url
+        deadline = time.time() + float(self._cold_start_timeout_sec)
+        while True:
+            resp = client.post(url, json=body)
+            if resp.status_code in (303, 307, 308):
+                loc = resp.headers.get("Location")
+                if loc:
+                    url = loc if loc.startswith("http") else f"{self._base_url}{loc}"
+                logger.info(
+                    "Modal GPU soğuk başlatma (HTTP %d), sunucu ısınıyor... (%s)",
+                    resp.status_code,
+                    self.engine_id,
+                )
+                if time.time() > deadline:
+                    raise EngineUnavailableError(
+                        self.engine_id,
+                        f"Modal soğuk başlatma zaman aşımı ({self._cold_start_timeout_sec} sn).",
+                    )
+                time.sleep(3.0)
+                continue
+            return resp
+
+    def _put_json(self, client: httpx.Client, initial_url: str, payload: dict) -> httpx.Response:
+        url = initial_url
+        deadline = time.time() + float(self._cold_start_timeout_sec)
+        while True:
+            resp = client.put(url, json=payload)
+            if resp.status_code in (303, 307, 308):
+                loc = resp.headers.get("Location")
+                if loc:
+                    url = loc if loc.startswith("http") else f"{self._base_url}{loc}"
+                logger.info(
+                    "Modal GPU ses yükleme soğuk başlatma (HTTP %d), sunucu ısınıyor... (%s)",
+                    resp.status_code,
+                    self.engine_id,
+                )
+                if time.time() > deadline:
+                    raise EngineUnavailableError(
+                        self.engine_id,
+                        f"Modal soğuk başlatma zaman aşımı ({self._cold_start_timeout_sec} sn).",
+                    )
+                time.sleep(3.0)
+                continue
+            return resp
 
     def close(self) -> None:
         if self._client is not None:
@@ -120,9 +167,10 @@ class RemoteHttpTtsEngine(BaseTtsEngine):
             "sampleRate": 24000,
         }
         try:
-            resp = client.put(
+            resp = self._put_json(
+                client,
                 f"{self._base_url}/v1/voices/{voice.voice_hash}",
-                json=payload,
+                payload,
             )
             if resp.status_code in (200, 201):
                 return
@@ -168,7 +216,7 @@ class RemoteHttpTtsEngine(BaseTtsEngine):
 
         for attempt in range(1, self._max_retries + 1):
             try:
-                resp = client.post(f"{self._base_url}/v1/synthesize", json=body)
+                resp = self._post_json(client, f"{self._base_url}/v1/synthesize", body)
 
                 # 404 voice_not_cached -> sesi yükle ve hemen tekrar dene
                 if resp.status_code == 404 and not voice_retried:
@@ -181,7 +229,7 @@ class RemoteHttpTtsEngine(BaseTtsEngine):
                         )
                         self.register_voice(voice)
                         voice_retried = True
-                        resp = client.post(f"{self._base_url}/v1/synthesize", json=body)
+                        resp = self._post_json(client, f"{self._base_url}/v1/synthesize", body)
 
                 if resp.status_code == 429:
                     raise EngineUnavailableError(
