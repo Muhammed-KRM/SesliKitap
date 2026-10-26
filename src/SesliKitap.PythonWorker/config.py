@@ -22,7 +22,7 @@ class Config(BaseSettings):
 
     # RabbitMQ
     rabbitmq_host: str = Field(default="localhost", validation_alias=AliasChoices("RABBITMQ_HOST", "rabbitmq_host"))
-    rabbitmq_port: int = Field(default=5673, validation_alias=AliasChoices("RABBITMQ_PORT", "rabbitmq_port"))
+    rabbitmq_port: int = Field(default=5674, validation_alias=AliasChoices("RABBITMQ_PORT", "rabbitmq_port"))
     rabbitmq_user: str = Field(
         default="guest",
         validation_alias=AliasChoices("RABBITMQ_USER", "RABBITMQ_USERNAME", "rabbitmq_user"),
@@ -54,7 +54,7 @@ class Config(BaseSettings):
 
     # Redis
     redis_url: str = Field(
-        default="redis://localhost:6380/0",
+        default="redis://localhost:6381/0",
         validation_alias=AliasChoices("REDIS_URL", "REDIS_CONNECTION_STRING", "redis_url"),
     )
 
@@ -112,7 +112,7 @@ class Config(BaseSettings):
         default=2,
         validation_alias=AliasChoices("TTS_QUALITY_MAX_RETRIES", "tts_quality_max_retries"),
     )
-    tts_max_chunk_chars: int = Field(default=480, validation_alias=AliasChoices("TTS_MAX_CHUNK_CHARS", "tts_max_chunk_chars"))
+    tts_max_chunk_chars: int = Field(default=580, validation_alias=AliasChoices("TTS_MAX_CHUNK_CHARS", "tts_max_chunk_chars"))
     tts_min_chunk_chars: int = Field(default=70, validation_alias=AliasChoices("TTS_MIN_CHUNK_CHARS", "tts_min_chunk_chars"))
     tts_transfer_sample_rate: int = 24000
     output_sample_rate: int = 48000

@@ -102,9 +102,9 @@ Bu script sırasıyla Docker konteynerlerini kontrol eder, Backend API'yi ve Fro
 
 ## 🛠️ 5. Sık Karşılaşılan Durumlar ve Çözümleri
 
-1. **"Port zaten kullanımda" Hatası:**
-   * Bilgisayarınızda yerel PostgreSQL (5432) kuruluysa bile sistem çakışmasın diye projemiz **5433** portunu kullanır.
-   * MinIO `9010`, Redis `6380`, RabbitMQ `5673`, API `5201`, Arayüz `4300` portundadır. Bu portların boş olduğundan emin olun.
+1. **Çoklu Proje ve Port Uyumluluğu (OtoEdit & VideoOzet ile Eşzamanlı Çalışma):**
+   * Bilgisayarınızda **OtoEdit** (5432, 6379, 5672, 15672, 9000/9001, 5001, 4200) veya **VideoOzet** (5433, 6380, 5673, 15673, 9002/9003, 5002, 4201) projeleri aynı anda çalışsa dahi **SesliKitap hiçbir port çakışması yaşamadan bağımsız olarak çalışır**.
+   * SesliKitap portları: PostgreSQL **5434**, Redis **6381**, RabbitMQ **5674** (Panel: **15674**), MinIO **9010** (Panel: **9011**), .NET API **5201**, Web Arayüzü **4300**.
 2. **İlk Sentezde 20–30 Saniye Bekleme (Cold Start):**
    * Modal L4 GPU sunucusu maliyet tasarrufu için boştayken uyku moduna geçer.
    * İlk bölümü veya ses örneğini üretirken GPU'nun uyanması ~20 saniye sürebilir, ardından gelen tüm bölümler saniyeler içinde yıldırım hızında üretilir.

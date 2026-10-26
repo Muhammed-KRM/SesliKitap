@@ -50,7 +50,7 @@ foreach ($folder in $presets) {
         -F "referansMetin=$refText" `
         -F "kullanimOnayi=true" `
         -F "varsayilanMi=$isDefault" `
-        -F "sesDosyasi=@$wavPath;type=audio/wav"
+        -F "ses=@$wavPath;type=audio/wav"
 
     $lines = $resp -split "`n"
     $code = $lines[-1].Trim()

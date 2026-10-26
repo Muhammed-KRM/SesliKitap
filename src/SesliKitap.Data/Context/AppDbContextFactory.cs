@@ -12,7 +12,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     public AppDbContext CreateDbContext(string[] args)
     {
         var connectionString = Environment.GetEnvironmentVariable("SESLIKITAP_DESIGN_CONNECTION")
-            ?? "Host=localhost;Port=5433;Database=seslikitap;Username=postgres;Password=postgres";
+            ?? "Host=localhost;Port=5434;Database=seslikitap;Username=postgres;Password=postgres";
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseNpgsql(connectionString, npgsql =>

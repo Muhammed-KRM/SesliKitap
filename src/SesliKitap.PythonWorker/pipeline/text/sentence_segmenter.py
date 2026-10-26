@@ -12,6 +12,9 @@ from models.synthesis_models import Paragraph, Sentence
 _RESOURCES_DIR = Path(__file__).resolve().parents[2] / "resources"
 
 _DIALOGUE_PREFIX_RE = re.compile(r"^\s*[—–\-]\s*\S")
+_LIST_ITEM_PREFIX_RE = re.compile(
+    r"^\s*(?:[•·▪▫◦⁃*■►]|(?:\d+|[a-zA-ZçğıöşüÇĞİÖŞÜ]|[IVXLCDMivxlcdm]+)[\.\)])\s+"
+)
 _SINGLE_INITIAL_RE = re.compile(r"(?:^|\s)[A-ZÇĞİÖŞÜ]\.$")
 _MULTI_DOT_ABBR_RE = re.compile(r"(?:^|\s)(?:[A-ZÇĞİÖŞÜa-zçğıöşü]{1,3}\.){2,}$")
 _ROMAN_DOT_RE = re.compile(r"(?:^|\s)[IVXLCDM]{1,7}\.$")
@@ -133,40 +136,81 @@ class SentenceSegmenter:
             if not raw_para_stripped:
                 continue
 
-            # Paragraf içinde satır başı diyalog tirelerini ayrı alt-bloklara ayır
+            # Paragraf içinde satır başı diyalog tirelerini ve madde imlerini ayrı alt-bloklara ayır
             lines = [ln.strip() for ln in raw_para_stripped.split("\n") if ln.strip()]
-            sub_blocks: list[str] = []
+            sub_blocks: list[tuple[str, str]] = []  # (text, kind) -> kind: 'normal', 'dialogue', 'list'
             for ln in lines:
-                if sub_blocks and (_DIALOGUE_PREFIX_RE.match(ln) or _DIALOGUE_PREFIX_RE.match(sub_blocks[-1])):
-                    sub_blocks.append(ln)
-                elif sub_blocks:
-                    sub_blocks[-1] = f"{sub_blocks[-1]} {ln}"
+                is_list = bool(_LIST_ITEM_PREFIX_RE.match(ln))
+                is_diag = bool(_DIALOGUE_PREFIX_RE.match(ln))
+                if is_list:
+                    sub_blocks.append((ln, "list"))
+                elif is_diag:
+                    sub_blocks.append((ln, "dialogue"))
+                elif sub_blocks and sub_blocks[-1][1] in ("list", "dialogue"):
+                    prev_txt, kind = sub_blocks[-1]
+                    sub_blocks[-1] = (f"{prev_txt} {ln}", kind)
+                elif sub_blocks and sub_blocks[-1][1] == "normal":
+                    prev_txt, kind = sub_blocks[-1]
+                    if prev_txt.rstrip().endswith(":"):
+                        sub_blocks.append((ln, "normal"))
+                    else:
+                        sub_blocks[-1] = (f"{prev_txt} {ln}", "normal")
                 else:
-                    sub_blocks.append(ln)
+                    sub_blocks.append((ln, "normal"))
 
-            para_sentences: list[Sentence] = []
-            for block in sub_blocks:
-                is_dialogue_block = bool(_DIALOGUE_PREFIX_RE.match(block))
-                raw_sentences = self._split_block_into_sentences(block)
-                for s_text in raw_sentences:
-                    cleaned = s_text.strip()
-                    if not cleaned:
-                        continue
-                    is_diag = is_dialogue_block or bool(_DIALOGUE_PREFIX_RE.match(cleaned))
-                    para_sentences.append(
-                        Sentence(
-                            index=sentence_idx,
-                            paragraph=paragraph_idx,
-                            display=cleaned,
-                            spoken="",
-                            is_dialogue=is_diag,
+            has_list_items = any(k == "list" for _, k in sub_blocks)
+
+            if not has_list_items:
+                # Standart paragraf veya diyalog bloğu: tüm alt bloklar tek bir Paragraph altında toplanır
+                para_sentences: list[Sentence] = []
+                for block_text, block_kind in sub_blocks:
+                    is_dialogue_block = block_kind == "dialogue"
+                    raw_sentences = self._split_block_into_sentences(block_text)
+                    for s_text in raw_sentences:
+                        cleaned = s_text.strip()
+                        if not cleaned:
+                            continue
+                        is_diag = is_dialogue_block or bool(_DIALOGUE_PREFIX_RE.match(cleaned))
+                        para_sentences.append(
+                            Sentence(
+                                index=sentence_idx,
+                                paragraph=paragraph_idx,
+                                display=cleaned,
+                                spoken="",
+                                is_dialogue=is_diag,
+                            )
                         )
-                    )
-                    sentence_idx += 1
+                        sentence_idx += 1
 
-            if para_sentences:
-                paragraphs.append(Paragraph(index=paragraph_idx, sentences=para_sentences))
-                paragraph_idx += 1
+                if para_sentences:
+                    paragraphs.append(Paragraph(index=paragraph_idx, sentences=para_sentences))
+                    paragraph_idx += 1
+            else:
+                # Madde madde sayım kısmı (bullet/numbered list): Her bir liste maddesi ve liste öncesi giriş
+                # cümlesi kendi bağımsız Paragraph nesnesini alır. Böylece her madde kendi başına sentezlenir.
+                for block_text, block_kind in sub_blocks:
+                    is_dialogue_block = block_kind == "dialogue"
+                    raw_sentences = self._split_block_into_sentences(block_text)
+                    para_sentences = []
+                    for s_text in raw_sentences:
+                        cleaned = s_text.strip()
+                        if not cleaned:
+                            continue
+                        is_diag = is_dialogue_block or bool(_DIALOGUE_PREFIX_RE.match(cleaned))
+                        para_sentences.append(
+                            Sentence(
+                                index=sentence_idx,
+                                paragraph=paragraph_idx,
+                                display=cleaned,
+                                spoken="",
+                                is_dialogue=is_diag,
+                            )
+                        )
+                        sentence_idx += 1
+
+                    if para_sentences:
+                        paragraphs.append(Paragraph(index=paragraph_idx, sentences=para_sentences))
+                        paragraph_idx += 1
 
         return paragraphs
 

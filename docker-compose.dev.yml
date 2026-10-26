@@ -1,9 +1,9 @@
-﻿services:
+services:
   postgres:
     image: postgres:16
     container_name: seslikitap-dev-postgres
     ports:
-      - "${DB_PORT:-5433}:5432"
+      - "${DB_PORT:-5434}:5432"
     environment:
       POSTGRES_DB: ${DB_NAME:-seslikitap}
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -21,7 +21,7 @@
     image: redis:7-alpine
     container_name: seslikitap-dev-redis
     ports:
-      - "6380:6379"
+      - "${REDIS_PORT:-6381}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -33,8 +33,8 @@
     image: rabbitmq:3-management-alpine
     container_name: seslikitap-dev-rabbitmq
     ports:
-      - "${RABBITMQ_PORT:-5673}:5672"
-      - "15673:15672"
+      - "${RABBITMQ_PORT:-5674}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15674}:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}

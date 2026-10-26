@@ -41,7 +41,7 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: seslikitap-rabbitmq
     ports:
-      - "127.0.0.1:15673:15672"
+      - "127.0.0.1:15674:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}

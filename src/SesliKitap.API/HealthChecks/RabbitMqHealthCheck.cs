@@ -30,7 +30,7 @@ public sealed class RabbitMqHealthCheck : IHealthCheck
             cts.CancelAfter(TimeSpan.FromSeconds(3));
 
             var host = _configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost";
-            var port = _configuration.GetValue<int?>("RabbitMQ:Port") ?? 5673;
+            var port = _configuration.GetValue<int?>("RabbitMQ:Port") ?? 5674;
 
             using var tcpClient = new TcpClient();
             await tcpClient.ConnectAsync(host, port, cts.Token);

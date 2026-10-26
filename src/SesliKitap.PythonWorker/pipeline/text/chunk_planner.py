@@ -10,7 +10,7 @@ from models.synthesis_models import Chunk, Sentence
 class ChunkPlanner:
     """Normalize edilmiş cümleleri TTS parçalarına dönüştürür; zaman damgası eşlemesini korur."""
 
-    def __init__(self, max_chars: int = 480, min_chars: int = 70) -> None:
+    def __init__(self, max_chars: int = 580, min_chars: int = 70) -> None:
         if max_chars < 50:
             raise ValueError("max_chars en az 50 olmalıdır.")
         if min_chars < 1 or min_chars >= max_chars:
@@ -91,7 +91,9 @@ class ChunkPlanner:
                 i += 1
                 continue
 
-            # Kural 1 & 2: Aynı paragraftaki ardışık cümleleri max_chars sınırına kadar birleştir
+            # Kural 2: Paragraf ve Madde Odaklı Birleştirme
+            # Bir paragraf veya liste maddesi bitene kadar TÜM ardışık cümleleri tek bir parça (Chunk) olarak topla.
+            # Yalnızca paragraf çok uzunsa (> max_chars) cümle sınırından güvenle böl.
             group: list[Sentence] = [curr]
             combined_text = spoken
             j = i + 1
@@ -100,10 +102,12 @@ class ChunkPlanner:
                 j < total
                 and not valid_sentences[j].is_heading
                 and valid_sentences[j].paragraph == curr.paragraph
-                and (len(combined_text) + 1 + len(valid_sentences[j].spoken.strip()) <= self.max_chars)
+                and (valid_sentences[j].is_dialogue == curr.is_dialogue)
             ):
                 cand = valid_sentences[j]
                 cand_text = cand.spoken.strip()
+                if len(combined_text) + 1 + len(cand_text) > self.max_chars:
+                    break
                 group.append(cand)
                 combined_text = f"{combined_text} {cand_text}"
                 j += 1
@@ -137,7 +141,7 @@ class ChunkPlanner:
                     is_paragraph_end=is_para_end,
                     is_heading=False,
                     is_dialogue_transition=is_diag_trans,
-                    is_subchunk=False,
+                    is_subchunk=not is_para_end and not is_diag_trans,
                 )
             )
             chunk_counter += 1

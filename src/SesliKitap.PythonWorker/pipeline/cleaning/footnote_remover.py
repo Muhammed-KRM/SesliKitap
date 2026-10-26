@@ -4,7 +4,7 @@ import re
 
 from models.book_models import CleaningStats, ExtractedDocument, TextBlock, TextLine, TextSpan
 
-_FOOTNOTE_START_RE = re.compile(r"^(\d{1,3}[.)]?|[*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]+)\s*\S+")
+_FOOTNOTE_START_RE = re.compile(r"^(\d{1,3}[.)]?|[*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]+)\s*\S+", re.DOTALL)
 _BRACKET_REF_RE = re.compile(r"\[\d{1,3}\]")
 _UNICODE_SUPERSCRIPT_RE = re.compile(r"[¹²³⁴⁵⁶⁷⁸⁹⁰]+")
 _SUPERSCRIPT_ONLY_RE = re.compile(r"^[\d*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰()\[\]]+$")
@@ -87,8 +87,8 @@ class FootnoteRemover:
         if avg_size >= body_font_size * self.size_ratio:
             return False
 
-        first_line_text = block.lines[0].text.strip()
-        return _FOOTNOTE_START_RE.match(first_line_text) is not None
+        block_text = block.text.strip()
+        return _FOOTNOTE_START_RE.match(block_text) is not None
 
     @staticmethod
     def _clean_inline_markers(

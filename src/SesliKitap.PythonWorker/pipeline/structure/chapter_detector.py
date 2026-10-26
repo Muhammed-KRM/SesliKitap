@@ -192,8 +192,8 @@ class ChapterDetector:
         total_words = sum(count_words(d.clean_text) for d in drafts)
         avg_words = total_words / len(drafts)
         # Küçük test belgelerinde veya gerçek kitaplarda makul ortalama kelime kontrolü
-        min_avg = 80 if total_words < 2000 else 250
-        if avg_words < min_avg:
+        min_avg = 80 if total_words < 2000 else 350
+        if avg_words < min_avg or (len(drafts) > 80 and total_words < 50000):
             return []
 
         return drafts
@@ -205,7 +205,7 @@ class ChapterDetector:
             return False
 
         words = txt.split()
-        if len(words) > 12:
+        if len(words) > 10:
             return False
 
         if txt.endswith((".", ",", ";", "?", "!")) and not (
@@ -216,13 +216,18 @@ class ChapterDetector:
         if not any(ch.isalpha() for ch in txt):
             return bool(_CHAPTER_HEADING_PATTERNS[3].match(txt) and par.font_size >= body_size * 1.35)
 
-        matches_pattern = any(pat.match(txt) is not None for pat in _CHAPTER_HEADING_PATTERNS)
-        is_large_or_bold = par.is_heading_tag or (par.font_size >= body_size * 1.25) or (par.is_bold and par.font_size >= body_size * 1.05)
+        # Üstbilgi, dipnot veya gövde altı fontlar başlık olamaz
+        if par.font_size < body_size * 1.15:
+            return False
 
-        if matches_pattern and (is_large_or_bold or len(words) <= 6):
+        matches_pattern = any(pat.match(txt) is not None for pat in _CHAPTER_HEADING_PATTERNS)
+        is_large = par.is_heading_tag or (par.font_size >= body_size * 1.30)
+        is_bold_title = par.is_bold and par.font_size >= body_size * 1.20 and len(words) <= 6
+
+        if matches_pattern and (is_large or is_bold_title):
             return True
 
-        return bool(is_large_or_bold and 1 <= len(words) <= 10 and len(txt) >= 3)
+        return bool(is_large and 1 <= len(words) <= 8 and len(txt) >= 3)
 
     def _detect_fixed_size(self, cleaned: CleanedDocument) -> list[ChapterDraft]:
         all_pars = [p.text for p in cleaned.all_paragraphs if p.text.strip()]

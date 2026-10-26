@@ -84,7 +84,7 @@ echo SesliKitap Sistemi Basariyla Baslatildi!
 echo Arayuz:    http://localhost:4300
 echo Swagger:   http://localhost:5201/swagger
 echo MinIO:     http://localhost:9011 (minioadmin / minioadmin)
-echo RabbitMQ:  http://localhost:15673 (guest / guest)
+echo RabbitMQ:  http://localhost:15674 (guest / guest)
 echo Not:       API erisim anahtari .env dosyasindaki ADMIN_API_KEY degeridir.
 echo ========================================================
 if not "%~1"=="--no-pause" (

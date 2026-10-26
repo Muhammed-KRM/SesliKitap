@@ -67,3 +67,26 @@ def test_segmenter_handles_dialogue_and_quoted_questions() -> None:
     assert all_sentences[2].is_dialogue is True
     assert all_sentences[3].is_dialogue is True
     assert all_sentences[4].display == '"Gerçekten gelecek mi?" diye düşündü.'
+
+
+def test_segmenter_handles_bullet_points_and_numbered_lists() -> None:
+    segmenter = SentenceSegmenter()
+    text = (
+        "Ana şemalarımız KURALLAR, OYNAM ve KÜLTÜR:\n"
+        "• KURALLAR, oyunların temelindeki yapılara odaklanır.\n"
+        "• OYNAM, oyuncunun oyunla etkileşimini ele alır.\n"
+        "• KÜLTÜR, geniş kültürel bağlamları inceler."
+    )
+
+    paragraphs = segmenter.split_paragraphs(text)
+
+    # Giriş cümlesi + 3 ayrı madde imi = 4 bağımsız paragraf
+    assert len(paragraphs) == 4
+    assert "Ana şemalarımız" in paragraphs[0].sentences[0].display
+    assert "KURALLAR" in paragraphs[1].sentences[0].display
+    assert "OYNAM" in paragraphs[2].sentences[0].display
+    assert "KÜLTÜR" in paragraphs[3].sentences[0].display
+    assert paragraphs[1].index == 1
+    assert paragraphs[2].index == 2
+    assert paragraphs[3].index == 3
+

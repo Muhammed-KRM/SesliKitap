@@ -78,3 +78,45 @@ def test_line_joiner_merges_paragraphs_across_pages_and_separates_dialogues() ->
     assert len(pars_by_page[1]) == 2
     assert pars_by_page[1][0].text.startswith("— Merhaba")
     assert pars_by_page[1][1].text.startswith("— Kütüphaneye")
+
+
+def test_line_joiner_reconstructs_paragraphs_from_fragmented_single_line_blocks_and_stitches_drop_cap() -> None:
+    # Sayfadaki her satırın ayrı blok olarak geldiği PDF düzenini simüle et
+    blocks = [
+        # Drop cap 'O'
+        TextBlock(lines=[_line("O", 85.0, 140.0, 114.0, 145.0, size=44.0)], bbox=(114.0, 85.0, 145.0, 140.0), page_index=0),
+        # Paragraf 1 satırları
+        TextBlock(lines=[_line("yun sektörüne ilişkin ilgimizin başlangıcı, 2019 yılında yaptığımız bir araştırma-", 94.0, 105.0)], bbox=(146.0, 94.0, 430.0, 105.0), page_index=0),
+        TextBlock(lines=[_line("ya dayanıyor. İzmir Kalkınma Ajansı olarak 2019 yılı boyunca İzmir'i merkeze", 107.0, 118.0)], bbox=(146.0, 107.0, 430.0, 118.0), page_index=0),
+        TextBlock(lines=[_line("alan çok sayıda araştırma yaptık. Yaratıcı endüstrileri konu edindiğimiz araş-", 120.0, 131.0)], bbox=(146.0, 120.0, 430.0, 131.0), page_index=0),
+        TextBlock(lines=[_line("tırmamız da bunlardan bir tanesiydi. Alanında öncü ve birçok açıdan ilk olma özelliği", 133.0, 144.0)], bbox=(116.0, 133.0, 430.0, 144.0), page_index=0),
+        TextBlock(lines=[_line("taşıyan bu çalışmamız, İzmir'in yaratıcı endüstriler açısından sahip olduğu potan-", 146.0, 157.0)], bbox=(116.0, 146.0, 430.0, 157.0), page_index=0),
+        TextBlock(lines=[_line("siyeli ortaya koyarken özellikle oyun sektörüne özel bir ilgi gösterilmesi gerektiğini", 159.0, 170.0)], bbox=(116.0, 159.0, 430.0, 170.0), page_index=0),
+        TextBlock(lines=[_line("veriye dayalı olarak işaret ediyordu. Hal böylece olunca, 2020 yılında oyun sektörünü", 172.0, 183.0)], bbox=(116.0, 172.0, 430.0, 183.0), page_index=0),
+        TextBlock(lines=[_line("Ajansımızın temel çalışma alanları arasına dâhil ettik.", 185.0, 196.0, x1=342.0)], bbox=(116.0, 185.0, 342.0, 196.0), page_index=0),
+        # Paragraf 2 satırları (belirgin dikey boşlukla başlar ve nokta sonrasıdır)
+        TextBlock(lines=[_line("Yaptığımız ilk iş, oyun sektörünü tanımak ve öğrenmekti. Bu kapsamda, masa başı", 200.0, 211.0)], bbox=(116.0, 200.0, 430.0, 211.0), page_index=0),
+        TextBlock(lines=[_line("çalışmalarının yanı sıra etkinliklere katılım sağlayarak sektörün dinamiklerini anlamaya", 213.0, 224.0)], bbox=(116.0, 213.0, 430.0, 224.0), page_index=0),
+        TextBlock(lines=[_line("çalıştık.", 226.0, 237.0, x1=200.0)], bbox=(116.0, 226.0, 200.0, 237.0), page_index=0),
+    ]
+
+    page = ExtractedPage(index=0, width=595.0, height=842.0, blocks=blocks)
+    doc = ExtractedDocument(format="pdf", pages=[page], toc=[], meta=BookMeta())
+    stats = CleaningStats()
+
+    joiner = LineJoiner()
+    pars_by_page = joiner.join_document(doc, body_font_size=8.8, stats=stats)
+
+    # 12 ayrı blok tam olarak 2 düzenli paragrafa dönüşmeli
+    assert len(pars_by_page[0]) == 2
+    par1 = pars_by_page[0][0].text
+    par2 = pars_by_page[0][1].text
+
+    assert par1.startswith("Oyun sektörüne ilişkin ilgimizin başlangıcı")
+    assert "İzmir'i merkeze alan çok sayıda" in par1
+    assert "ilk olma özelliği taşıyan bu" in par1
+    assert "oyun sektörünü Ajansımızın temel çalışma alanları arasına dâhil ettik." in par1
+    assert par1.endswith("dâhil ettik.")
+
+    assert par2.startswith("Yaptığımız ilk iş, oyun sektörünü")
+    assert par2.endswith("çalıştık.")

@@ -458,8 +458,8 @@ def normalize_case(text: str) -> str:
 
 def normalize_punctuation_for_tts(text: str) -> str:
     """Kural 13: Noktalama işaretlerini TTS prozodi kalitesi için sadeleştirir."""
-    # Diyalog tirelerini baştan temizle
-    text = re.sub(r"^\s*[—–\-]\s*", "", text)
+    # Madde imlerini ve diyalog tirelerini baştan temizle (TTS motoru seslendirmesin)
+    text = re.sub(r"^\s*[•·▪▫◦⁃*■►—–\-]\s*", "", text)
     # Üç nokta -> tek karakter '…'
     text = re.sub(r"\.{3,}", "…", text)
     # Parantezleri virgüle çevir

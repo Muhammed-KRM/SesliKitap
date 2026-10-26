@@ -23,8 +23,7 @@ Thumbs.db
 .DS_Store
 
 ## Logs & Backups
-logs/
-**/logs/
+/logs/
 *.log
 hata*.txt
 backups/
@@ -44,7 +43,7 @@ ENV/
 build/
 develop-eggs/
 dist/
-downloads/
+/downloads/
 eggs/
 .eggs/
 lib/

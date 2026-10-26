@@ -119,7 +119,7 @@ public static class EnvFileLoader
         if (string.IsNullOrWhiteSpace(configuration.GetConnectionString("DefaultConnection")))
         {
             var host = Environment.GetEnvironmentVariable("DB_HOST") ?? configuration["DB_HOST"];
-            var port = Environment.GetEnvironmentVariable("DB_PORT") ?? configuration["DB_PORT"] ?? "5433";
+            var port = Environment.GetEnvironmentVariable("DB_PORT") ?? configuration["DB_PORT"] ?? "5434";
             var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? configuration["DB_NAME"];
             var user = Environment.GetEnvironmentVariable("DB_USER") ?? configuration["DB_USER"];
             var pass = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? configuration["DB_PASSWORD"];

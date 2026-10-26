@@ -98,7 +98,7 @@ public static class DependencyInjection
         {
             var redisConn = configuration.GetValue<string>("Redis:ConnectionString")
                             ?? configuration.GetValue<string>("REDIS_CONNECTION_STRING")
-                            ?? "localhost:6380";
+                            ?? "localhost:6381";
             var redisOpts = ConfigurationOptions.Parse(redisConn);
             redisOpts.AbortOnConnectFail = false;
             redisOpts.ConnectTimeout = 2000;
@@ -148,7 +148,7 @@ public static class DependencyInjection
             x.UsingRabbitMq((ctx, rmq) =>
             {
                 var host = configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost";
-                var port = configuration.GetValue<ushort?>("RabbitMQ:Port") ?? 5673;
+                var port = configuration.GetValue<ushort?>("RabbitMQ:Port") ?? 5674;
                 var user = configuration.GetValue<string>("RabbitMQ:Username") ?? "guest";
                 var pass = configuration.GetValue<string>("RabbitMQ:Password") ?? "guest";
 

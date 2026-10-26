@@ -30,6 +30,9 @@ _LIGATURE_MAP = str.maketrans(
     }
 )
 _MULTI_SPACE_RE = re.compile(r"[ \t]+")
+_LIST_ITEM_PREFIX_RE = re.compile(
+    r"^\s*(?:[•·▪▫◦⁃*■►]|(?:\d+|[a-zA-ZçğıöşüÇĞİÖŞÜ]|[IVXLCDMivxlcdm]+)[\.\)])\s+"
+)
 
 
 class LineJoiner:
@@ -133,12 +136,29 @@ class LineJoiner:
         prev_x0, prev_y0, prev_x1, prev_y1 = prev_line.bbox
         curr_x0, curr_y0, _, _ = curr_line.bbox
 
-        if curr_line.text.lstrip().startswith(("—", "–", "- ")):
+        curr_txt = curr_line.text.lstrip()
+        if curr_txt.startswith(("—", "–", "- ")):
             return True
+
+        if _LIST_ITEM_PREFIX_RE.match(curr_txt):
+            return True
+
+        # Türkçe küçük harfle başlayan satır ASLA yeni paragraf olamaz (cümle devamıdır)
+        if curr_txt and curr_txt[0] in _LOWER_CHARS:
+            return False
+
+        prev_txt = prev_line.text.rstrip()
+        # Tire ile biten satır ASLA yeni paragraf olamaz
+        if prev_txt.endswith("-"):
+            return False
+
+        # Önceki satır cümle bitiş noktalaması ile bitmediyse cümle devam ediyordur
+        if not prev_txt.endswith(_TERMINAL_PUNCT):
+            return False
 
         line_height = max(8.0, prev_y1 - prev_y0)
         vertical_gap = curr_y0 - prev_y1
-        if vertical_gap > line_height * 1.5:
+        if vertical_gap > line_height * 1.35:
             return True
 
         avg_char_width = max(4.0, body_font_size * 0.5)
@@ -146,8 +166,7 @@ class LineJoiner:
             return True
 
         prev_width = prev_x1 - prev_x0
-        prev_txt = prev_line.text.rstrip()
-        return bool(prev_width < block_width * 0.60 and prev_txt.endswith(_TERMINAL_PUNCT))
+        return bool(prev_width < block_width * 0.80)
 
     def _join_lines(self, lines: list[TextLine], stats: CleaningStats) -> str:
         if not lines:
@@ -194,19 +213,57 @@ class LineJoiner:
         while idx < len(page_paragraphs) - 1:
             curr_par = page_paragraphs[idx]
             next_par = page_paragraphs[idx + 1]
+
+            c_txt = curr_par.text.strip()
+            n_txt = next_par.text.strip()
+            if not c_txt or not n_txt:
+                idx += 1
+                continue
+
+            # Drop Cap (Büyük Başlangıç Harfi) birleştirme: örn. 'O' + 'yun sektörüne...' -> 'Oyun sektörüne...'
             if (
-                not curr_par.is_heading_tag
-                and not next_par.is_heading_tag
-                and curr_par.font_size < body_font_size * 1.25
-                and next_par.font_size < body_font_size * 1.25
+                len(c_txt) <= 2
+                and c_txt.isupper()
+                and (curr_par.font_size > body_font_size * 1.2 or curr_par.font_size >= 18.0)
             ):
-                curr_txt = curr_par.text.rstrip()
-                next_txt = next_par.text.lstrip()
-                if curr_txt.endswith("-") and next_txt and next_txt[0] in _LOWER_CHARS:
-                    merged = self._join_two_strings(curr_txt, next_txt, stats)
-                    curr_par.text = self.normalize_text(merged)
+                if n_txt[0] in _LOWER_CHARS:
+                    curr_par.text = self.normalize_text(c_txt + n_txt)
+                    curr_par.font_size = next_par.font_size
+                    curr_par.is_heading_tag = False
                     page_paragraphs.pop(idx + 1)
                     continue
+
+            # Başlık etiketli veya belirgin başlık fontlu paragrafları gövde metniyle birleştirme
+            if curr_par.is_heading_tag or next_par.is_heading_tag:
+                idx += 1
+                continue
+            if curr_par.font_size >= body_font_size * 1.35 or next_par.font_size >= body_font_size * 1.35:
+                idx += 1
+                continue
+
+            # Madde imi veya diyalog çizgisi yeni paragraftır
+            if n_txt.startswith(("—", "–", "- ")) or _LIST_ITEM_PREFIX_RE.match(n_txt):
+                idx += 1
+                continue
+
+            # Birleştirme koşulları:
+            # 1. Önceki satır tire ile bitiyorsa (kelime bölünmesi)
+            # 2. Sonraki satır küçük harfle başlıyorsa (cümle devamı)
+            # 3. Önceki satır bitiş noktalamasıyla bitmediyse (cümle bölünmesi)
+            should_merge = False
+            if c_txt.endswith("-"):
+                should_merge = True
+            elif n_txt[0] in _LOWER_CHARS:
+                should_merge = True
+            elif not c_txt.endswith(_TERMINAL_PUNCT):
+                should_merge = True
+
+            if should_merge:
+                merged = self._join_two_strings(c_txt, n_txt, stats)
+                curr_par.text = self.normalize_text(merged)
+                page_paragraphs.pop(idx + 1)
+                continue
+
             idx += 1
 
     def _merge_across_pages(
@@ -234,7 +291,18 @@ class LineJoiner:
             if not last_txt or not next_txt:
                 continue
 
-            if not last_txt.endswith(_TERMINAL_PUNCT) and next_txt[0] in _LOWER_CHARS:
+            if _LIST_ITEM_PREFIX_RE.match(next_txt) or next_txt.startswith(("—", "–", "- ")):
+                continue
+
+            should_merge = False
+            if last_txt.endswith("-"):
+                should_merge = True
+            elif next_txt[0] in _LOWER_CHARS:
+                should_merge = True
+            elif not last_txt.endswith(_TERMINAL_PUNCT):
+                should_merge = True
+
+            if should_merge:
                 merged = self._join_two_strings(last_txt, next_txt, stats)
                 last_par.text = self.normalize_text(merged)
                 next_page.pop(0)

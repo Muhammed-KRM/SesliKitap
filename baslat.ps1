@@ -32,7 +32,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot
 
 # 4. Frontend Angular'ı ayrı bir pencerede başlat
 Write-Host "[4/4] SesliKitap Frontend başlatılıyor (Port 4300)..." -ForegroundColor Cyan
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\src\SesliKitap.Frontend'; Write-Host 'Frontend Sunucusu Başlatılıyor (http://localhost:4300)...' -ForegroundColor Green; npm start"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\src\SesliKitap.Frontend'; Write-Host 'Frontend Sunucusu Başlatılıyor (http://localhost:4300)...' -ForegroundColor Green; npm.cmd start"
 
 Write-Host "==================================================" -ForegroundColor Green
 Write-Host "Tüm servisler başlatıldı!                         " -ForegroundColor Green
