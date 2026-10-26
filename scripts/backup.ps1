@@ -3,7 +3,7 @@
     SesliKitap PostgreSQL veritabanı ve MinIO nesne deposu yedekleme betiği (Faz 9).
 .DESCRIPTION
     1. PostgreSQL veritabanını özel sıkıştırılmış biçimde (pg_dump -Fc) dışa aktarır.
-    2. MinIO "seslikitap" bucket içeriğini (cache/* hariç) yerel yedek klasörüne kopyalar.
+    2. MinIO "seslikitap" bucket içeriğini (tts-cache hariç) yerel yedek klasörüne kopyalar.
     3. İsteğe bağlı olarak 7-Zip AES-256 (BACKUP_PASSWORD ortam değişkeni varsa) veya ZIP arşivi oluşturur.
     4. 14 günden eski yedekleri otomatik temizler.
 #>
@@ -48,7 +48,7 @@ docker exec $MinioContainer mkdir -p $containerTmp
 if ($IncludeCache) {
     docker exec $MinioContainer sh -c "cp -r /data/$Bucket/* $containerTmp/ 2>/dev/null || true"
 } else {
-    docker exec $MinioContainer sh -c "for d in /data/$Bucket/*; do base=`$(basename `"`$d`"); if [ `"`$base`" != 'cache' ]; then cp -r `"`$d`" $containerTmp/ 2>/dev/null || true; fi; done"
+    docker exec $MinioContainer sh -c "for d in /data/$Bucket/*; do base=`$(basename `"`$d`"); if [ `"`$base`" != 'cache' -a `"`$base`" != 'tts-cache' ]; then cp -r `"`$d`" $containerTmp/ 2>/dev/null || true; fi; done"
 }
 docker cp "${MinioContainer}:${containerTmp}/." $minioBackupDir
 docker exec $MinioContainer rm -rf $containerTmp
@@ -67,6 +67,12 @@ if ($sevenZip -and $env:BACKUP_PASSWORD) {
 
 Write-Host "[4/4] $RetentionDays günden eski yedekler temizleniyor..." -ForegroundColor Cyan
 $cutoff = (Get-Date).AddDays(-$RetentionDays)
-Get-ChildItem -Path $backupRoot | Where-Object { $_.LastWriteTime -lt $cutoff } | Remove-Item -Recurse -Force
+Get-ChildItem -Path $backupRoot -Filter "seslikitap_backup_*.zip" | Where-Object { $_.LastWriteTime -lt $cutoff } | Remove-Item -Force
+Get-ChildItem -Path $backupRoot -Filter "seslikitap_backup_*.7z" | Where-Object { $_.LastWriteTime -lt $cutoff } | Remove-Item -Force
 
-Write-Host "Yedekleme başarıyla tamamlandı: $targetDir" -ForegroundColor Green
+Write-Host ""
+Write-Host "============================================================" -ForegroundColor Green
+Write-Host "Yedekleme başarıyla tamamlandı!" -ForegroundColor Green
+Write-Host "Yedek Arşivi: $archivePath" -ForegroundColor Yellow
+Write-Host "Yedek Klasörü: $targetDir" -ForegroundColor Yellow
+Write-Host "============================================================" -ForegroundColor Green

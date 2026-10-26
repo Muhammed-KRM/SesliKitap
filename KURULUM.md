@@ -2,6 +2,9 @@
 
 Bu rehber, **SesliKitap** projesini sıfır veya başka bir bilgisayara kurarken hiçbir şeyi unutmadan, eksiksiz ve dakikalar içinde çalışır hale getirmeniz için adım adım hazırlanmıştır.
 
+> [!TIP]
+> **Mevcut Bir Bilgisayardan Veri & Ses Taşıyorsanız:** Eğer başka bir bilgisayarda seslendirmesi başlamış bir kitabı kaldığı yerden devam ettirmek istiyorsanız doğrudan [docs/BILGISAYARLAR_ARASI_GECIS_REHBERI.md](file:///d:/Seslikitap/docs/BILGISAYARLAR_ARASI_GECIS_REHBERI.md) kılavuzuna bakın.
+
 ---
 
 ## 📋 1. Yeni Bilgisayarda Gereken Ön Yazılımlar
